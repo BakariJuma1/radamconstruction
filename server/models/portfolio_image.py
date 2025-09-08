@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class PortfolioImage(db.Model,SerializerMixin):
-    __tablename__ = "portfolio_item"
+    __tablename__ = "portfolio_images"
 
     id = db.Column(db.Integer, primary_key=True)
     image_url = db.Column(db.String(255), nullable=False) 
