@@ -3,7 +3,7 @@ from flask import request,jsonify
 from server.models.user import User
 from server.extension import db 
 from flask_jwt_extended import create_access_token
-from . import auth_bp
+from .import auth_bp
 
 api=Api(auth_bp)
 
@@ -24,4 +24,4 @@ class Login(Resource):
             return {"error": "Invalid email or password"}, 401
         
 api.add_resource(Login,'/login')
-        
+
