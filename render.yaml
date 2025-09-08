@@ -1,10 +1,9 @@
 services:
   - type: web
-    name: radamconstruction-backend
+    name: radamconstruction
     env: python
-    rootDir: radamconstruction-backend/server
     buildCommand: pip install -r requirements.txt
     startCommand: flask db upgrade && gunicorn wsgi:app
-    plan: free
     envVars:
-      - fromGroup: radamconstruction-env
+      - key: FLASK_APP
+        value: wsgi.py
