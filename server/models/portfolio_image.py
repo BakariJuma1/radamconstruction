@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 
-class PortfolioImage(db.Model):
+class PortfolioImage(db.Model,SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     image_url = db.Column(db.String(255), nullable=False)  # Cloudinary URL
 
