@@ -1,7 +1,7 @@
 from flask import Flask
 from  server.extension import db,migrate,jwt
 from dotenv import load_dotenv
-
+from server.route import register_routes
 
 load_dotenv()
 
@@ -16,6 +16,8 @@ def create_app():
     @app.route('/')
     def home():
         return {"message":"Welcome to Radam construction Api"}
+    
+    register_routes(app)
     
     return app
 
