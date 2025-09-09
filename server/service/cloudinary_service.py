@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def upload_files_to_cloudinary(files, folder="radam-construction"):
  
     if not isinstance(files, list):
-        files = [files]  # normalize to list
+        files = [files]  
 
     uploaded_results = []
 

@@ -18,7 +18,7 @@ class PortfolioListResource(Resource):
     def post(self):
         title = request.form.get("title")
         description = request.form.get("description")
-        files = request.files.getlist("images")  # multiple files
+        files = request.files.getlist("images") 
 
         portfolio = PortfolioItem(title=title, description=description)
         db.session.add(portfolio)
