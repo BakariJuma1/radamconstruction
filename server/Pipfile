@@ -13,6 +13,7 @@ psycopg2-binary = "*"
 flask-migrate = "*"
 flask-cors = "*"
 sqlalchemy-serializer = "*"
+faker = "*"
 
 [dev-packages]
 

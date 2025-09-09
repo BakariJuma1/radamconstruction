@@ -10,9 +10,12 @@ const HomePage = () => {
 
   useEffect(() => {
     // Fetch services data
-    axios.get('/services')
+    axios.get('https://radamconstruction.onrender.com/services')
       .then(response => {
-        setServices(response.data.slice(0, 3));
+        const data = Array.isArray(response.data)
+          ? response.data
+          : response.data.services || []; // handle wrapped object
+        setServices(data.slice(0, 3));
         setLoadingServices(false);
       })
       .catch(error => {
@@ -21,18 +24,21 @@ const HomePage = () => {
       });
 
     // Fetch portfolio data
-    axios.get('/portfolio')
+    axios.get('https://radamconstruction.onrender.com/portfolio')
       .then(response => {
-        const portfolioData = response.data.slice(0, 3);
+        const data = Array.isArray(response.data)
+          ? response.data
+          : response.data.portfolio || []; // handle wrapped object
+        const portfolioData = data.slice(0, 3);
         setPortfolio(portfolioData);
-        
+
         // Initialize current image index for each portfolio item
         const initialIndexes = {};
         portfolioData.forEach((item, index) => {
           initialIndexes[index] = 0;
         });
         setCurrentImageIndex(initialIndexes);
-        
+
         setLoadingPortfolio(false);
       })
       .catch(error => {
@@ -52,7 +58,7 @@ const HomePage = () => {
   const prevImage = (portfolioIndex) => {
     setCurrentImageIndex(prevIndexes => ({
       ...prevIndexes,
-      [portfolioIndex]: (prevIndexes[portfolioIndex] - 1 + portfolio[portfolioIndex].images.length) % 
+      [portfolioIndex]: (prevIndexes[portfolioIndex] - 1 + portfolio[portfolioIndex].images.length) %
                         portfolio[portfolioIndex].images.length
     }));
   };
@@ -128,7 +134,7 @@ const HomePage = () => {
                       alt={project.title} 
                       className="w-full h-full object-cover"
                     />
-                    {project.images.length > 1 && (
+                    {project.images && project.images.length > 1 && (
                       <>
                         <button 
                           onClick={() => prevImage(index)}

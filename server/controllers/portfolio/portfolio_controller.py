@@ -1,11 +1,14 @@
 from flask import request
-from flask_restful import Resource,Api
+from flask_restful import Resource, Api
 from flask_jwt_extended import jwt_required
 from server.extension import db
-from server.models import Service, PortfolioItem, PortfolioImage, Booking
+from server.models import PortfolioItem, PortfolioImage
+from server.service.cloudinary_service import upload_files_to_cloudinary
 from . import portfolio_bp
 
 api = Api(portfolio_bp)
+
+
 class PortfolioListResource(Resource):
     def get(self):
         items = PortfolioItem.query.all()
@@ -13,20 +16,22 @@ class PortfolioListResource(Resource):
 
     @jwt_required()
     def post(self):
-        data = request.get_json()
-        portfolio = PortfolioItem(
-            title=data.get("title"),
-            description=data.get("description")
-        )
-        db.session.add(portfolio)
-        db.session.flush()  # Get ID before commit
+        title = request.form.get("title")
+        description = request.form.get("description")
+        files = request.files.getlist("images")  # multiple files
 
-        if data.get("images"):
-            for url in data["images"]:  # array of Cloudinary URLs
-                db.session.add(PortfolioImage(image_url=url, portfolio=portfolio))
+        portfolio = PortfolioItem(title=title, description=description)
+        db.session.add(portfolio)
+        db.session.flush()
+
+        if files:
+            uploaded = upload_files_to_cloudinary(files, folder="radam-construction/portfolio")
+            for img in uploaded:
+                db.session.add(PortfolioImage(image_url=img["secure_url"], portfolio=portfolio))
 
         db.session.commit()
         return portfolio.to_dict(rules=("-images.portfolio",)), 201
+
 
 class PortfolioResource(Resource):
     def get(self, portfolio_id):
@@ -36,16 +41,18 @@ class PortfolioResource(Resource):
     @jwt_required()
     def put(self, portfolio_id):
         item = PortfolioItem.query.get_or_404(portfolio_id)
-        data = request.get_json()
+        title = request.form.get("title")
+        description = request.form.get("description")
+        files = request.files.getlist("images")
 
-        if "title" in data: item.title = data["title"]
-        if "description" in data: item.description = data["description"]
+        if title: item.title = title
+        if description: item.description = description
 
-        if "images" in data:
-            # Clear old images and add new ones
+        if files:
             PortfolioImage.query.filter_by(portfolio_id=item.id).delete()
-            for url in data["images"]:
-                db.session.add(PortfolioImage(image_url=url, portfolio=item))
+            uploaded = upload_files_to_cloudinary(files, folder="radam-construction/portfolio")
+            for img in uploaded:
+                db.session.add(PortfolioImage(image_url=img["secure_url"], portfolio=item))
 
         db.session.commit()
         return item.to_dict(rules=("-images.portfolio",)), 200
@@ -57,5 +64,6 @@ class PortfolioResource(Resource):
         db.session.commit()
         return {"message": "Portfolio item deleted"}, 200
 
-api.add_resource(PortfolioListResource,'/portfolio')
-api.add_resource(PortfolioResource,'/portfolio/<int:portfolio_id>')
+
+api.add_resource(PortfolioListResource, '/portfolio')
+api.add_resource(PortfolioResource, '/portfolio/<int:portfolio_id>')

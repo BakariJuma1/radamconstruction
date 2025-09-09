@@ -2,6 +2,7 @@ from flask import Flask
 from  server.extension import db,migrate,jwt
 from dotenv import load_dotenv
 from server.route import register_routes
+from server.seed import run_seeds
 
 load_dotenv()
 
@@ -18,6 +19,7 @@ def create_app():
         return {"message":"Welcome to Radam construction Api"}
     
     register_routes(app)
+    run_seeds(app)
     
     return app
 
