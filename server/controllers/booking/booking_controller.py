@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource,Api
 from flask_jwt_extended import jwt_required
 from server.extension import db
-from server.models import Service, PortfolioItem, PortfolioImage, Booking
+from server.models import Service, Booking
 from . import booking_bp
 
 api = Api(booking_bp)

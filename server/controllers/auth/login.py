@@ -1,5 +1,5 @@
 from flask_restful import Resource,Api
-from flask import request,jsonify
+from flask import request
 from server.models.user import User
 from server.extension import db 
 from flask_jwt_extended import create_access_token
