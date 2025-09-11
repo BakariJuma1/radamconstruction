@@ -1,5 +1,6 @@
 from flask import Flask
-from  server.extension import db,migrate,jwt
+from flask_cors import CORS
+from server.extension import db, migrate, jwt
 from dotenv import load_dotenv
 from server.route import register_routes
 from server.seed import run_seeds
@@ -23,4 +24,21 @@ def create_app():
     
     return app
 
-app=create_app()     
+def create_app():
+    app = Flask(__name__)
+    app.config.from_prefixed_env()
+
+    CORS(app)  # Enable CORS for all routes
+    db.init_app(app)
+    migrate.init_app(app, db)
+    jwt.init_app(app)
+
+    @app.route('/')
+    def home():
+        return {"message": "Welcome to Radam construction Api"}
+
+    register_routes(app)
+
+    return app
+
+app = create_app()
