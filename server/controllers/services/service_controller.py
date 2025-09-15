@@ -30,7 +30,7 @@ class ServiceListResource(Resource):
             title=title,
             description=description,
             price=price,
-            images=uploaded_urls  # JSON column
+            images=uploaded_urls  
         )
         db.session.add(service)
         db.session.commit()

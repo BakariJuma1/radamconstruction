@@ -15,5 +15,5 @@ class Service(db.Model,SerializerMixin):
     
     serialize_rules = ("-bookings.service",)
 
-    # One service  many bookings
+   
     bookings = db.relationship("Booking", back_populates="service", cascade="all, delete-orphan")
