@@ -8,7 +8,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center mb-4">
               <div className="bg-blue-600 text-white font-bold text-xl p-2 mr-2">R</div>
-              <span className="text-xl font-bold">Radamajaribu Builders</span>
+              <span className="text-xl font-bold">adamjaribu Builders</span>
             </div>
             <p className="text-gray-400 mb-4">
               Building excellence since 2009. Quality construction services for residential and commercial projects.

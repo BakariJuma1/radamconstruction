@@ -9,7 +9,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center">
-          <div className="bg-blue-800 text-white font-bold text-xl p-2 mr-2 rounded-lg">
+          <div className="bg-blue-800 text-white font-bold text-xl p-2 mr-0.5 rounded-lg">
             R
           </div>
           <span className="text-xl font-bold text-gray-800">
@@ -28,7 +28,7 @@ const Navbar = () => {
           <a href="/portfolio" className="text-gray-600 hover:text-blue-600">
             Projects
           </a>
-         
+
           <a href="/contact" className="text-gray-600 hover:text-blue-600">
             Contact
           </a>
