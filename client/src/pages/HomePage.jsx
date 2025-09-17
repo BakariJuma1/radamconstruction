@@ -174,9 +174,7 @@ const HomePage = () => {
                     <h3 className="text-xl font-semibold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                       {service.name}
                     </h3>
-                    <p className="text-gray-600 mb-4">
-                      {service.short_description}
-                    </p>
+                    <p className="text-gray-600 mb-4">{service.description}</p>
                     <a
                       href="/services"
                       className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800 transition-colors duration-300"
