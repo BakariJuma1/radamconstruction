@@ -1,35 +1,80 @@
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Menu, X } from "lucide-react"; // hamburger & close icons
 
-export default function Navbar() {
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Logo / Brand */}
-          <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-blue-600">
-              RadamJaribuBuilders
-            </Link>
+    <header className="bg-white shadow-sm py-4 sticky top-0 z-50">
+      <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
+        {/* Logo */}
+        <div className="flex items-center">
+          <div className="bg-blue-800 text-white font-bold text-xl p-2 mr-2 rounded-lg">
+            R
           </div>
+          <span className="text-xl font-bold text-gray-800">
+            adamjaribu Builders
+          </span>
+        </div>
 
-          {/* Links */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-blue-600">Home</Link>
-            <Link to="/services" className="text-gray-700 hover:text-blue-600">Services</Link>
-            <Link to="/portfolio" className="text-gray-700 hover:text-blue-600">Portfolio</Link>
-            <Link to="/booking" className="text-gray-700 hover:text-blue-600">Booking</Link>
-            <Link to="/login" className="text-gray-700 hover:text-blue-600">Login</Link>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex space-x-8 items-center">
+          <a href="/" className="text-blue-600 font-medium">
+            Home
+          </a>
+          <a href="/services" className="text-gray-600 hover:text-blue-600">
+            Services
+          </a>
+          <a href="/portfolio" className="text-gray-600 hover:text-blue-600">
+            Projects
+          </a>
+         
+          <a href="/contact" className="text-gray-600 hover:text-blue-600">
+            Contact
+          </a>
+          <a href="/login" className="text-gray-600 hover:text-blue-600">
+            Login
+          </a>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
+            Get Quote
+          </button>
+        </nav>
 
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button className="text-gray-700 focus:outline-none">
-              ☰
-            </button>
-          </div>
+        {/* Mobile Hamburger */}
+        <div className="md:hidden">
+          <button onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
       </div>
-    </nav>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden bg-white shadow-md">
+          <nav className="flex flex-col space-y-4 p-4">
+            <a href="/" className="text-blue-600 font-medium">
+              Home
+            </a>
+            <a href="/services" className="text-gray-600 hover:text-blue-600">
+              Services
+            </a>
+            <a href="/portfolio" className="text-gray-600 hover:text-blue-600">
+              Projects
+            </a>
+            <a href="/contact" className="text-gray-600 hover:text-blue-600">
+              Contact
+            </a>
+            <a href="/login" className="text-gray-600 hover:text-blue-600">
+              Login
+            </a>
+            <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded w-full">
+              Get Quote
+            </button>
+          </nav>
+        </div>
+      )}
+    </header>
   );
-}
+};
+
+export default Navbar;

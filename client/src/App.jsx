@@ -5,6 +5,8 @@ import PortfolioPage from "./pages/PortfolioPage.jsx";
 import BookingPage from "./pages/BookingPage";
 import Navbar from "./components/Navbar.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import Footer from "./components/Footer.jsx";
+import Contact from "./pages/Contact.jsx";
 
 function App() {
   return (
@@ -15,8 +17,11 @@ function App() {
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/booking" element={<BookingPage />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
+      <Footer/>
+
     </>
   );
 }
