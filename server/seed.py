@@ -31,19 +31,19 @@ def run_seeds(app):
             name="House Construction",
             description="Complete house construction from foundation to finishing.",
             price=500000.0,
-            image_url="https://via.placeholder.com/300x200"
+            image_url="https://images.unsplash.com/photo-1612935089040-89195ef54677?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
         )
         service2 = Service(
             name="Plumbing",
             description="Professional plumbing services.",
             price=20000.0,
-            image_url="https://via.placeholder.com/300x200"
+            image_url="https://images.unsplash.com/photo-1562159937-194305937c6a?q=80&w=1227&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
         )
         service3 = Service(
             name="Electrical Installation",
             description="Certified electrical wiring and installation.",
             price=30000.0,
-            image_url="https://via.placeholder.com/300x200"
+            image_url="https://images.unsplash.com/photo-1621905251918-48416bd8575a?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
         )
         db.session.add_all([service1, service2, service3])
         db.session.commit()
@@ -52,21 +52,21 @@ def run_seeds(app):
         portfolio1 = PortfolioItem(
             tittle="Modern Villa",
             description="A modern villa built with premium materials.",
-            image_url="https://via.placeholder.com/400x300"
+            image_url="https://images.unsplash.com/photo-1612935089040-89195ef54677?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
         )
         portfolio1.images = [
-            PortfolioImage(image_url="https://via.placeholder.com/400x300?1"),
-            PortfolioImage(image_url="https://via.placeholder.com/400x300?2"),
+            PortfolioImage(image_url="https://images.unsplash.com/photo-1593623671668-2964bc9bde85?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
+            PortfolioImage(image_url="https://images.unsplash.com/photo-1667923006173-9e0d2251f608?q=80&w=1227&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
         ]
 
         portfolio2 = PortfolioItem(
             tittle="Office Complex",
             description="High-rise office building.",
-            image_url="https://via.placeholder.com/400x300"
+            image_url="https://plus.unsplash.com/premium_photo-1661963657305-f52dcaeef418?q=80&w=2112&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
         )
         portfolio2.images = [
-            PortfolioImage(image_url="https://via.placeholder.com/400x300?3"),
-            PortfolioImage(image_url="https://via.placeholder.com/400x300?4"),
+            PortfolioImage(image_url="https://images.unsplash.com/photo-1580063665421-4c9cbe9ec11b?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
+            PortfolioImage(image_url="https://plus.unsplash.com/premium_photo-1683140804492-ae54cf3eec81?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
         ]
 
         db.session.add_all([portfolio1, portfolio2])
