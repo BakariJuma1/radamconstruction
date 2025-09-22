@@ -23,7 +23,7 @@ class Login(Resource):
                 "access_token": token,
                 "user":user.id,
                 "email":user.email,
-                "name":user.name
+                "name":user.username
                 
                 }, 200
         else:

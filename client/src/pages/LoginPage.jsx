@@ -1,8 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '../AuthContext'
 
 export default function LoginPage() {
+  const { login } = useContext(AuthContext)
   const [credentials, setCredentials] = useState({
     email: '',
     password: ''
@@ -25,17 +27,22 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const response = await axios.post('https://radamconstruction.onrender.com/login', credentials)
-      
-      // Store the token (you might want to use context or redux for state management)
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
-      
-      // Redirect to dashboard or home page
+      const response = await axios.post(
+        'https://radamconstruction.onrender.com/login',
+        credentials
+      )
+
+      // Backend returns { access_token: ... }
+      const token = response.data.access_token
+
+      // Call the context login to store user/token
+      login({ email: credentials.email }, token)
+
+      // Redirect to dashboard
       navigate('/admin/dashboard')
     } catch (error) {
       console.error('Login error:', error)
-      setError(error.response?.data?.message || 'Invalid email or password')
+      setError(error.response?.data?.error || 'Invalid email or password')
     } finally {
       setIsLoading(false)
     }
@@ -47,8 +54,18 @@ export default function LoginPage() {
         <div>
           <div className="text-center">
             <div className="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
               </svg>
             </div>
             <h2 className="mt-6 text-3xl font-bold text-gray-900">
@@ -69,7 +86,10 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <div className="mt-1">
@@ -88,7 +108,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="mt-1">
@@ -114,13 +137,19 @@ export default function LoginPage() {
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-sm text-gray-900"
+                >
                   Remember me
                 </label>
               </div>
 
               <div className="text-sm">
-                <a href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                <a
+                  href="/forgot-password"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
                   Forgot your password?
                 </a>
               </div>
