@@ -16,11 +16,11 @@ class PortfolioListResource(Resource):
 
     @jwt_required()
     def post(self):
-        title = request.form.get("title")
+        tittle = request.form.get("title")
         description = request.form.get("description")
         files = request.files.getlist("images") 
 
-        portfolio = PortfolioItem(title=title, description=description)
+        portfolio = PortfolioItem(tittle=tittle, description=description)
         db.session.add(portfolio)
         db.session.flush()
 
@@ -41,11 +41,11 @@ class PortfolioResource(Resource):
     @jwt_required()
     def put(self, portfolio_id):
         item = PortfolioItem.query.get_or_404(portfolio_id)
-        title = request.form.get("title")
+        tittle = request.form.get("title")
         description = request.form.get("description")
         files = request.files.getlist("images")
 
-        if title: item.title = title
+        if tittle: item.tittle = tittle
         if description: item.description = description
 
         if files:
