@@ -4,12 +4,14 @@ from dotenv import load_dotenv
 from server.route import register_routes
 from server.seed import run_seeds
 from flask_cors import CORS
+import os
 
 load_dotenv()
 
 def create_app():
     app=Flask(__name__)
     app.config.from_prefixed_env()
+    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 
     db.init_app(app)
     migrate.init_app(app,db)
