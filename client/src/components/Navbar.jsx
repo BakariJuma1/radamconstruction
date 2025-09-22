@@ -57,7 +57,7 @@ const Navbar = () => {
             R
           </div>
           <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            Adamjaribu Builders
+            adamjaribu Builders
           </span>
         </a>
 
