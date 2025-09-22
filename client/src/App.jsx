@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import Footer from "./components/Footer.jsx";
 import Contact from "./pages/Contact.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
       <Footer/>
 

@@ -19,7 +19,13 @@ class Login(Resource):
         user = User.query.filter_by(email=email).first()
         if user and user.check_password(password):
             token = create_access_token(identity=user.id)
-            return {"access_token": token}, 200
+            return {
+                "access_token": token,
+                "user":user.id,
+                "email":user.email,
+                "name":user.name
+                
+                }, 200
         else:
             return {"error": "Invalid email or password"}, 401
         

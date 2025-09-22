@@ -24,7 +24,7 @@ export default function Contact() {
     setIsSubmitting(true)
     
     try {
-      const response = await axios.post('https://radamconstruction.onrender.com/contact', formData)
+      const response = await axios.post('https://radamconstruction.onrender.com/contacts', formData)
       setSubmitMessage('Message sent successfully! We will get back to you soon.')
       setFormData({
         name: '',

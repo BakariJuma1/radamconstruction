@@ -136,32 +136,6 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Demo Credentials
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-4 bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 text-center">
-                Email: admin@radamconstruction.com<br />
-                Password: demo123
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
-            © {new Date().getFullYear()} Radam Construction. All rights reserved.
-          </p>
         </div>
       </div>
     </div>
