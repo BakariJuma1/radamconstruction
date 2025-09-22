@@ -7,8 +7,8 @@ from . import booking_bp
 
 api = Api(booking_bp)
 class BookingListResource(Resource):
+    @jwt_required()
     def get(self):
-        # optionally protect with @jwt_required()
         bookings = Booking.query.all()
         return [b.to_dict(rules=("-service.bookings",)) for b in bookings], 200
 
@@ -27,6 +27,7 @@ class BookingListResource(Resource):
 
 
 class BookingResource(Resource):
+    @jwt_required()
     def get(self, booking_id):
         booking = Booking.query.get_or_404(booking_id)
         return booking.to_dict(rules=("-service.bookings",)), 200
