@@ -510,7 +510,7 @@ const AdminDashboard = () => {
                           />
                         )}
                         <div className="p-4">
-                          <h4 className="font-semibold text-lg mb-2">{service.title}</h4>
+                          <h4 className="font-semibold text-lg mb-2">{service.name}</h4>
                           <p className="text-gray-600 text-sm mb-2 line-clamp-2">{service.description}</p>
                           {service.price && (
                             <p className="text-blue-600 font-medium mb-3">Price: {service.price}</p>

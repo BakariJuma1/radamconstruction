@@ -16,7 +16,7 @@ class ServiceListResource(Resource):
 
     @jwt_required()
     def post(self):
-        title = request.form.get("title")
+        name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
         files = request.files.getlist("images")
@@ -27,10 +27,10 @@ class ServiceListResource(Resource):
             uploaded_urls = [img["secure_url"] for img in uploaded]
 
         service = Service(
-            title=title,
+            name=name,
             description=description,
             price=price,
-            images=uploaded_urls  
+            image_url=uploaded_urls[0] if uploaded_urls else None
         )
         db.session.add(service)
         db.session.commit()
