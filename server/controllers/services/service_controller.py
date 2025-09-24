@@ -21,16 +21,21 @@ class ServiceListResource(Resource):
         price = request.form.get("price")
         files = request.files.getlist("images")
 
-        uploaded_urls = []
-        if files:
-            uploaded = upload_files_to_cloudinary(files, folder="radam-construction/services")
-            uploaded_urls = [img["secure_url"] for img in uploaded]
+       
+        if not name:
+            return {"error": "Service name is required"}, 400
+        if not files:
+            return {"error": "At least one image is required"}, 400
+
+        # Upload the first image
+        uploaded = upload_files_to_cloudinary(files, folder="radam-construction/services")
+        image_url = uploaded[0]["secure_url"]
 
         service = Service(
-            name=name,
+            name=name.strip(),
             description=description,
             price=price,
-            image_url=uploaded_urls[0] if uploaded_urls else None
+            image_url=image_url
         )
         db.session.add(service)
         db.session.commit()
@@ -46,18 +51,22 @@ class ServiceResource(Resource):
     @jwt_required()
     def put(self, service_id):
         service = Service.query.get_or_404(service_id)
-        title = request.form.get("title")
+
+        name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
         files = request.files.getlist("images")
 
-        if title: service.title = title
-        if description: service.description = description
-        if price: service.price = price
+        if name:
+            service.name = name.strip()
+        if description:
+            service.description = description
+        if price:
+            service.price = price
 
         if files:
             uploaded = upload_files_to_cloudinary(files, folder="radam-construction/services")
-            service.images = [img["secure_url"] for img in uploaded]
+            service.image_url = uploaded[0]["secure_url"]
 
         db.session.commit()
         return service.to_dict(), 200
@@ -70,5 +79,5 @@ class ServiceResource(Resource):
         return {"message": "Service deleted"}, 200
 
 
-api.add_resource(ServiceListResource, '/services')
-api.add_resource(ServiceResource, '/services/<int:service_id>')
+api.add_resource(ServiceListResource, "/services")
+api.add_resource(ServiceResource, "/services/<int:service_id>")
