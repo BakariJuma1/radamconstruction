@@ -1,6 +1,6 @@
 from flask import request
 from flask_restful import Resource, Api
-from flask_jwt_extended import jwt_required, jwt_optional, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from server.extension import db
 from server.models import Service
 from server.service.cloudinary_service import upload_files_to_cloudinary
@@ -14,7 +14,7 @@ api = Api(services_bp)
 
 
 class ServiceListResource(Resource):
-    @jwt_optional()
+    @jwt_required(optional=True)
     def get(self):
         current_user_email = get_jwt_identity()
         services = Service.query.all()
@@ -50,7 +50,7 @@ class ServiceListResource(Resource):
 
 
 class ServiceResource(Resource):
-    @jwt_optional()
+    @jwt_required(optional=True)
     def get(self, service_id):
         service = Service.query.get_or_404(service_id)
         current_user_email = get_jwt_identity()
