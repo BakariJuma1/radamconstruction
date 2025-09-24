@@ -20,14 +20,24 @@ class PortfolioListResource(Resource):
         description = request.form.get("description")
         files = request.files.getlist("images") 
 
-        portfolio = PortfolioItem(tittle=tittle, description=description)
+        if not files:
+            return {"error": "At least one image is required"}, 400
+
+        # Upload all images
+        uploaded = upload_files_to_cloudinary(files, folder="radam-construction/portfolio")
+
+        # First image becomes the cover 
+        portfolio = PortfolioItem(
+            tittle=tittle,
+            description=description,
+            image_url=uploaded[0]["secure_url"]  
+        )
         db.session.add(portfolio)
         db.session.flush()
 
-        if files:
-            uploaded = upload_files_to_cloudinary(files, folder="radam-construction/portfolio")
-            for img in uploaded:
-                db.session.add(PortfolioImage(image_url=img["secure_url"], portfolio=portfolio))
+        # Add all images to PortfolioImage
+        for img in uploaded:
+            db.session.add(PortfolioImage(image_url=img["secure_url"], portfolio=portfolio))
 
         db.session.commit()
         return portfolio.to_dict(rules=("-images.portfolio",)), 201
@@ -45,12 +55,21 @@ class PortfolioResource(Resource):
         description = request.form.get("description")
         files = request.files.getlist("images")
 
-        if tittle: item.tittle = tittle
-        if description: item.description = description
+        if tittle:
+            item.tittle = tittle
+        if description:
+            item.description = description
 
         if files:
+            
             PortfolioImage.query.filter_by(portfolio_id=item.id).delete()
+
+            
             uploaded = upload_files_to_cloudinary(files, folder="radam-construction/portfolio")
+
+            # Update cover image
+            item.image_url = uploaded[0]["secure_url"]
+
             for img in uploaded:
                 db.session.add(PortfolioImage(image_url=img["secure_url"], portfolio=item))
 

@@ -158,7 +158,7 @@ const AdminDashboard = () => {
     
     try {
       const formData = new FormData();
-      formData.append('title', newService.title);
+      formData.append('name', newService.title);
       formData.append('description', newService.description);
       formData.append('price', newService.price);
       
