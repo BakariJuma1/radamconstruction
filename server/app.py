@@ -23,7 +23,7 @@ def create_app():
         return {"message":"Welcome to Radam construction Api"}
     
     register_routes(app)
-    run_seeds(app)
+    # run_seeds(app)
     
     return app
 

@@ -1,18 +1,25 @@
 from flask import request
 from flask_restful import Resource, Api
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, jwt_optional, get_jwt_identity
 from server.extension import db
 from server.models import Service
 from server.service.cloudinary_service import upload_files_to_cloudinary
+from server.helpers.filter import filter_bookings
 from . import services_bp
 
 api = Api(services_bp)
 
 
+
+
+
 class ServiceListResource(Resource):
+    @jwt_optional()
     def get(self):
+        current_user_email = get_jwt_identity()
         services = Service.query.all()
-        return [s.to_dict() for s in services], 200
+        services_list = [filter_bookings(s.to_dict(), current_user_email) for s in services]
+        return services_list, 200
 
     @jwt_required()
     def post(self):
@@ -21,7 +28,6 @@ class ServiceListResource(Resource):
         price = request.form.get("price")
         files = request.files.getlist("images")
 
-       
         if not name:
             return {"error": "Service name is required"}, 400
         if not files:
@@ -44,9 +50,11 @@ class ServiceListResource(Resource):
 
 
 class ServiceResource(Resource):
+    @jwt_optional()
     def get(self, service_id):
         service = Service.query.get_or_404(service_id)
-        return service.to_dict(), 200
+        current_user_email = get_jwt_identity()
+        return filter_bookings(service.to_dict(), current_user_email), 200
 
     @jwt_required()
     def put(self, service_id):

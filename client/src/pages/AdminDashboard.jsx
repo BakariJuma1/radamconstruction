@@ -183,7 +183,9 @@ const AdminDashboard = () => {
       const formData = new FormData();
       formData.append("name", newService.title);
       formData.append("description", newService.description);
-      formData.append("price", newService.price);
+      if (newService.price) {
+        formData.append("price", parseFloat(newService.price));
+      }
 
       newService.images.forEach((image) => {
         formData.append("images", image);
