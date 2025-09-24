@@ -179,8 +179,10 @@ const HomePage = () => {
               "Bamburi cement",
               "Doshi",
               "Simba cement",
+              "Rai cement",
               "Lakhir plastics",
               "Basco paints",
+              "Crown paints"
             ].map((company, index) => (
               <div key={index} className="text-lg font-semibold text-gray-700 transition-transform hover:scale-105">
                 {company}
