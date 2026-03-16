@@ -8,9 +8,85 @@ from . import hardware_bp
 
 api = Api(hardware_bp)
 
+DEFAULT_HARDWARE_CATALOG = [
+    {
+        "name": "Cement and Masonry",
+        "items": [
+            "Cement",
+            "Blocks",
+            "Ballast",
+            "Sand",
+            "Binding wire",
+            "Reinforcement bars",
+        ],
+    },
+    {
+        "name": "Plumbing",
+        "items": [
+            "PVC pipes and fittings",
+            "Water tanks",
+            "Taps and mixers",
+            "Toilets and sinks",
+            "Showers and accessories",
+            "Drainage fittings",
+        ],
+    },
+    {
+        "name": "Finishes",
+        "items": [
+            "Paints and primers",
+            "Tiles",
+            "Ceiling boards",
+            "Gypsum accessories",
+            "Doors and locks",
+            "Windows and frames",
+        ],
+    },
+    {
+        "name": "Tools and Site Supplies",
+        "items": [
+            "Wheelbarrows",
+            "Spades and hoes",
+            "Safety gear",
+            "Power tools",
+            "Measuring tools",
+            "Fasteners and sealants",
+        ],
+    },
+]
+
+
+def ensure_default_hardware_catalog():
+    catalog_changed = False
+
+    for default_category in DEFAULT_HARDWARE_CATALOG:
+        category = HardwareCategory.query.filter_by(name=default_category["name"]).first()
+        if not category:
+            category = HardwareCategory(name=default_category["name"])
+            db.session.add(category)
+            db.session.flush()
+            catalog_changed = True
+
+        existing_item_names = {
+            item.name.strip().lower() for item in category.items if item.name
+        }
+
+        for item_name in default_category["items"]:
+            normalized_name = item_name.strip().lower()
+            if normalized_name in existing_item_names:
+                continue
+
+            db.session.add(HardwareItem(name=item_name, category=category))
+            existing_item_names.add(normalized_name)
+            catalog_changed = True
+
+    if catalog_changed:
+        db.session.commit()
+
 
 class HardwareCategoryListResource(Resource):
     def get(self):
+        ensure_default_hardware_catalog()
         categories = HardwareCategory.query.order_by(HardwareCategory.name.asc()).all()
         return [category.to_dict() for category in categories], 200
 
