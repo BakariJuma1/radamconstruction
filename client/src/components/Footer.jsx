@@ -2,8 +2,45 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white py-12">
-      <div className="container mx-auto px-4 md:px-8">
+    <footer className="bg-gray-900 text-white">
+      <div className="border-b border-white/10 bg-slate-950/60">
+        <div className="container mx-auto grid gap-6 px-4 py-10 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-300">
+              Visit Our Location
+            </p>
+            <h2 className="mt-3 text-3xl font-bold">Find us at Station Market, Lugari</h2>
+            <p className="mt-4 max-w-xl text-gray-300">
+              Visit the office and hardware store for quotations, construction
+              consultations, and materials inquiries.
+            </p>
+            <div className="mt-5 text-sm text-gray-300">
+              <p>Station Market, Lugari, Kakamega</p>
+              <p>Phone: +254 794 517 385</p>
+            </div>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Station+Market+Lugari+Kakamega"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-6 inline-flex items-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+            >
+              Open in Google Maps
+            </a>
+          </div>
+
+          <div className="overflow-hidden rounded-[1.75rem] border border-white/10 shadow-2xl">
+            <iframe
+              title="Radamjaribu Builders location map"
+              src="https://www.google.com/maps?q=Station+Market+Lugari+Kakamega&z=15&output=embed"
+              className="h-[320px] w-full"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-12 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center mb-4">
