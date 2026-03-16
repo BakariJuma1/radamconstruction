@@ -11,7 +11,13 @@ class User(db.Model,SerializerMixin):
     email = db.Column(db.String,nullable=False)
     password_hash = db.Column(db.String,nullable=False)
 
-    serialize_rules = ("-password_hash",)
+    serialize_rules = ("-password_hash", "-assigned_bookings.assigned_user")
+
+    assigned_bookings = db.relationship(
+        "Booking",
+        back_populates="assigned_user",
+        foreign_keys="Booking.assigned_user_id",
+    )
 
 
     def set_password(self,password):

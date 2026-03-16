@@ -59,6 +59,16 @@ const AdminDashboard = () => {
     password: "",
   });
   const [editingTeamMemberId, setEditingTeamMemberId] = useState(null);
+  const [bookingFilters, setBookingFilters] = useState({
+    search: "",
+    status: "all",
+    service: "all",
+    assignee: "all",
+  });
+  const [contactFilters, setContactFilters] = useState({
+    search: "",
+    type: "all",
+  });
 
   // Toggle item expansion for mobile
   const toggleItemExpansion = (itemId) => {
@@ -152,11 +162,14 @@ const AdminDashboard = () => {
         await apiCallWithRetry(async () => {
           switch (activeTab) {
             case "bookings":
-              const bookingsRes = await axios.get(
-                "https://radamconstruction.onrender.com/bookings",
-                config
-              );
+              const [bookingsRes, bookingsTeamRes, bookingServicesRes] = await Promise.all([
+                axios.get("https://radamconstruction.onrender.com/bookings", config),
+                axios.get("https://radamconstruction.onrender.com/users", config),
+                axios.get("https://radamconstruction.onrender.com/services"),
+              ]);
               setBookings(bookingsRes.data);
+              setTeamMembers(bookingsTeamRes.data);
+              setServices(bookingServicesRes.data);
               break;
             case "contacts":
               const contactsRes = await axios.get(
@@ -386,6 +399,83 @@ const AdminDashboard = () => {
       } else {
         showMessage("Error updating booking", "error");
       }
+    }
+  };
+
+  const updateBookingAssignment = async (bookingId, assignedUserId) => {
+    if (!validateAuth()) return;
+
+    try {
+      const payload = {
+        assigned_user_id: assignedUserId ? Number(assignedUserId) : null,
+      };
+
+      await apiCallWithRetry(async () => {
+        await axios.put(
+          `https://radamconstruction.onrender.com/bookings/${bookingId}`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      });
+
+      setBookings((current) =>
+        current.map((booking) =>
+          booking.id === bookingId
+            ? {
+                ...booking,
+                assigned_user_id: payload.assigned_user_id,
+                assigned_user:
+                  teamMembers.find(
+                    (member) => member.id === payload.assigned_user_id
+                  ) || null,
+              }
+            : booking
+        )
+      );
+
+      showMessage("Booking assignment updated", "success");
+    } catch (error) {
+      console.error("Error updating booking assignment:", error);
+      if (error.response?.status === 401) {
+        showMessage("Session expired. Please log in again.", "error");
+        logout();
+      } else {
+        showMessage("Error updating booking assignment", "error");
+      }
+    }
+  };
+
+  const markItemAsRead = async (type, id) => {
+    if (!validateAuth()) return;
+
+    try {
+      if (type === "booking") {
+        await axios.put(
+          `https://radamconstruction.onrender.com/bookings/${id}`,
+          { is_read: true },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setBookings((current) =>
+          current.map((booking) =>
+            booking.id === id ? { ...booking, is_read: true } : booking
+          )
+        );
+      }
+
+      if (type === "contact") {
+        await axios.put(
+          `https://radamconstruction.onrender.com/contacts/${id}`,
+          { is_read: true },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setContacts((current) =>
+          current.map((contact) =>
+            contact.id === id ? { ...contact, is_read: true } : contact
+          )
+        );
+      }
+    } catch (error) {
+      console.error(`Error marking ${type} as read:`, error);
     }
   };
 
@@ -828,6 +918,47 @@ const AdminDashboard = () => {
     },
   ];
 
+  const unreadBookingsCount = bookings.filter((booking) => !booking.is_read).length;
+  const unreadContactsCount = contacts.filter((contact) => !contact.is_read).length;
+  const filteredBookings = bookings.filter((booking) => {
+    const searchText = bookingFilters.search.trim().toLowerCase();
+    const matchesSearch =
+      !searchText ||
+      booking.name?.toLowerCase().includes(searchText) ||
+      booking.email?.toLowerCase().includes(searchText) ||
+      booking.phone?.toLowerCase().includes(searchText) ||
+      booking.service?.name?.toLowerCase().includes(searchText);
+    const matchesStatus =
+      bookingFilters.status === "all" ||
+      (booking.status || "pending") === bookingFilters.status;
+    const matchesService =
+      bookingFilters.service === "all" ||
+      String(booking.service?.id || "") === bookingFilters.service;
+    const matchesAssignee =
+      bookingFilters.assignee === "all" ||
+      (bookingFilters.assignee === "unassigned"
+        ? !booking.assigned_user_id
+        : String(booking.assigned_user_id || "") === bookingFilters.assignee);
+
+    return matchesSearch && matchesStatus && matchesService && matchesAssignee;
+  });
+  const filteredContacts = contacts.filter((contact) => {
+    const searchText = contactFilters.search.trim().toLowerCase();
+    const matchesSearch =
+      !searchText ||
+      contact.name?.toLowerCase().includes(searchText) ||
+      contact.email?.toLowerCase().includes(searchText) ||
+      contact.phone?.toLowerCase().includes(searchText) ||
+      contact.subject?.toLowerCase().includes(searchText);
+    const matchesType =
+      contactFilters.type === "all" ||
+      (contactFilters.type === "rfq"
+        ? contact.subject === "hardware-rfq"
+        : contact.subject !== "hardware-rfq");
+
+    return matchesSearch && matchesType;
+  });
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row">
       {/* Main Content */}
@@ -958,23 +1089,98 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-semibold text-gray-800">
                   Booking Requests ({bookings.length})
                 </h3>
+                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <input
+                    type="text"
+                    value={bookingFilters.search}
+                    onChange={(e) =>
+                      setBookingFilters((current) => ({
+                        ...current,
+                        search: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Search customer, phone, email, or service"
+                  />
+                  <select
+                    value={bookingFilters.status}
+                    onChange={(e) =>
+                      setBookingFilters((current) => ({
+                        ...current,
+                        status: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                  <select
+                    value={bookingFilters.service}
+                    onChange={(e) =>
+                      setBookingFilters((current) => ({
+                        ...current,
+                        service: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All services</option>
+                    {services.map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={bookingFilters.assignee}
+                    onChange={(e) =>
+                      setBookingFilters((current) => ({
+                        ...current,
+                        assignee: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All assignees</option>
+                    <option value="unassigned">Unassigned</option>
+                    {teamMembers.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.username}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="divide-y divide-gray-200">
-                {bookings.length === 0 ? (
+                {filteredBookings.length === 0 ? (
                   <EmptyState message="No booking requests found" icon="" />
                 ) : (
-                  bookings.map((booking) => (
+                  filteredBookings.map((booking) => (
                     <MobileTableRow
                       key={booking.id}
                       item={booking}
                       type="booking"
                     >
-                      <div className="p-4 sm:p-6">
+                      <div
+                        className={`p-4 sm:p-6 ${
+                          booking.is_read ? "" : "bg-sky-50/70"
+                        }`}
+                      >
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 truncate">
-                              {booking.name}
-                            </h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold text-gray-900 truncate">
+                                {booking.name}
+                              </h4>
+                              {!booking.is_read ? (
+                                <span className="rounded-full bg-sky-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-sky-700">
+                                  New
+                                </span>
+                              ) : null}
+                            </div>
                             <p className="text-sm text-gray-600 truncate">
                               {booking.email}
                             </p>
@@ -1033,6 +1239,14 @@ const AdminDashboard = () => {
                               {booking.service?.name || "Not specified"}
                             </span>
                           </div>
+                          <div className="sm:col-span-2">
+                            <span className="font-medium text-gray-700">
+                              Assigned to:
+                            </span>
+                            <span className="ml-2 text-gray-900">
+                              {booking.assigned_user?.username || "Unassigned"}
+                            </span>
+                          </div>
                         </div>
 
                         {(expandedItems.has(booking.id) ||
@@ -1048,29 +1262,66 @@ const AdminDashboard = () => {
                             </div>
 
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                              <div className="flex-1">
-                                <label
-                                  htmlFor={`status-${booking.id}`}
-                                  className="block text-sm font-medium text-gray-700 mb-1"
-                                >
-                                  Update Status:
-                                </label>
-                                <select
-                                  id={`status-${booking.id}`}
-                                  value={booking.status || "pending"}
-                                  onChange={(e) =>
-                                    updateBookingStatus(
-                                      booking.id,
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                >
-                                  <option value="pending">Pending</option>
-                                  <option value="confirmed">Confirmed</option>
-                                  <option value="rejected">Rejected</option>
-                                </select>
+                              <div className="flex-1 grid gap-3 lg:grid-cols-2">
+                                <div>
+                                  <label
+                                    htmlFor={`assignee-${booking.id}`}
+                                    className="block text-sm font-medium text-gray-700 mb-1"
+                                  >
+                                    Assign To:
+                                  </label>
+                                  <select
+                                    id={`assignee-${booking.id}`}
+                                    value={booking.assigned_user_id || ""}
+                                    onChange={(e) =>
+                                      updateBookingAssignment(
+                                        booking.id,
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  >
+                                    <option value="">Unassigned</option>
+                                    {teamMembers.map((member) => (
+                                      <option key={member.id} value={member.id}>
+                                        {member.username}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div>
+                                  <label
+                                    htmlFor={`status-${booking.id}`}
+                                    className="block text-sm font-medium text-gray-700 mb-1"
+                                  >
+                                    Update Status:
+                                  </label>
+                                  <select
+                                    id={`status-${booking.id}`}
+                                    value={booking.status || "pending"}
+                                    onChange={(e) =>
+                                      updateBookingStatus(
+                                        booking.id,
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  >
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="rejected">Rejected</option>
+                                  </select>
+                                </div>
                               </div>
+                              {!booking.is_read ? (
+                                <button
+                                  type="button"
+                                  onClick={() => markItemAsRead("booking", booking.id)}
+                                  className="rounded-lg bg-sky-100 px-4 py-2 text-sm font-medium text-sky-700 hover:bg-sky-200"
+                                >
+                                  Mark as read
+                                </button>
+                              ) : null}
                             </div>
                           </div>
                         )}
@@ -1089,23 +1340,62 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-semibold text-gray-800">
                   Contact Messages ({contacts.length})
                 </h3>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <input
+                    type="text"
+                    value={contactFilters.search}
+                    onChange={(e) =>
+                      setContactFilters((current) => ({
+                        ...current,
+                        search: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Search by customer, phone, email, or subject"
+                  />
+                  <select
+                    value={contactFilters.type}
+                    onChange={(e) =>
+                      setContactFilters((current) => ({
+                        ...current,
+                        type: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All messages</option>
+                    <option value="contact">General contacts</option>
+                    <option value="rfq">Hardware RFQs</option>
+                  </select>
+                </div>
               </div>
               <div className="divide-y divide-gray-200">
-                {contacts.length === 0 ? (
+                {filteredContacts.length === 0 ? (
                   <EmptyState message="No contact messages found" icon="" />
                 ) : (
-                  contacts.map((contact) => (
+                  filteredContacts.map((contact) => (
                     <MobileTableRow
                       key={contact.id}
                       item={contact}
                       type="contact"
                     >
-                      <div className="p-4 sm:p-6">
+                      <div
+                        className={`p-4 sm:p-6 ${
+                          contact.is_read ? "" : "bg-sky-50/70"
+                        }`}
+                      >
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 truncate">
-                              {contact.name}
-                            </h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold text-gray-900 truncate">
+                                {contact.name}
+                              </h4>
+                              {!contact.is_read ? (
+                                <span className="rounded-full bg-sky-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-sky-700">
+                                  New
+                                </span>
+                              ) : null}
+                            </div>
                             <p className="text-sm text-gray-600 truncate">
                               {contact.email}
                             </p>
@@ -1175,28 +1465,39 @@ const AdminDashboard = () => {
                             </div>
 
                             <div className="flex justify-end">
-                              <button
-                                onClick={() =>
-                                  deleteItem("contact", contact.id)
-                                }
-                                className="flex items-center px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200"
-                                aria-label="Delete message"
-                              >
-                                <svg
-                                  className="w-4 h-4 mr-2"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
+                              <div className="flex flex-col sm:flex-row gap-3">
+                                {!contact.is_read ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => markItemAsRead("contact", contact.id)}
+                                    className="px-4 py-2 bg-sky-100 text-sky-700 rounded-lg hover:bg-sky-200 transition-colors duration-200"
+                                  >
+                                    Mark as read
+                                  </button>
+                                ) : null}
+                                <button
+                                  onClick={() =>
+                                    deleteItem("contact", contact.id)
+                                  }
+                                  className="flex items-center px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200"
+                                  aria-label="Delete message"
                                 >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                  />
-                                </svg>
-                                Delete
-                              </button>
+                                  <svg
+                                    className="w-4 h-4 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                  </svg>
+                                  Delete
+                                </button>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -2267,8 +2568,10 @@ const AdminDashboard = () => {
                     activeTab === tab.id ? "text-slate-300" : "text-slate-400"
                   }`}
                 >
-                  {tab.id === "bookings" && `${bookings.length} requests`}
-                  {tab.id === "contacts" && `${contacts.length} messages`}
+                  {tab.id === "bookings" &&
+                    `${unreadBookingsCount} new / ${bookings.length} total`}
+                  {tab.id === "contacts" &&
+                    `${unreadContactsCount} new / ${contacts.length} total`}
                   {tab.id === "services" && `${services.length} services`}
                   {tab.id === "portfolio" && `${portfolio.length} projects`}
                   {tab.id === "hardware" &&
@@ -2277,6 +2580,20 @@ const AdminDashboard = () => {
                   {tab.id === "settings" && "Platform controls"}
                 </span>
               </div>
+              {(tab.id === "bookings" && unreadBookingsCount > 0) ||
+              (tab.id === "contacts" && unreadContactsCount > 0) ? (
+                <span
+                  className={`ml-3 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    activeTab === tab.id
+                      ? "bg-white/10 text-white"
+                      : "bg-sky-100 text-sky-700"
+                  }`}
+                >
+                  {tab.id === "bookings"
+                    ? unreadBookingsCount
+                    : unreadContactsCount}
+                </span>
+              ) : null}
               {activeTab === tab.id && (
                 <span className="ml-auto h-2 w-2 rounded-full bg-white"></span>
               )}

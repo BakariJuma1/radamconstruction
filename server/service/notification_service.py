@@ -70,3 +70,55 @@ def send_new_booking_notification(booking):
             """,
         }
     )
+
+
+def send_new_contact_notification(contact):
+    recipient_emails = _get_team_recipient_emails()
+    if not recipient_emails:
+        return None
+
+    api_key, from_email = _get_resend_config()
+    resend.api_key = api_key
+
+    subject = contact.subject or "New contact message"
+    message = contact.message or "No message provided."
+
+    return resend.Emails.send(
+        {
+            "from": from_email,
+            "to": recipient_emails,
+            "subject": f"New contact message: {subject}",
+            "html": f"""
+                <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #111827;">
+                  <h2 style="margin-bottom: 12px;">New contact message received</h2>
+                  <p style="margin-bottom: 20px;">A customer has submitted a message through the website.</p>
+                  <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                      <td style="padding: 10px 0; font-weight: 700; width: 160px;">Customer</td>
+                      <td style="padding: 10px 0;">{contact.name}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; font-weight: 700;">Phone</td>
+                      <td style="padding: 10px 0;">{contact.phone or "Not provided"}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; font-weight: 700;">Email</td>
+                      <td style="padding: 10px 0;">{contact.email}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; font-weight: 700;">Subject</td>
+                      <td style="padding: 10px 0;">{subject}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; font-weight: 700;">Submitted</td>
+                      <td style="padding: 10px 0;">{contact.created_at.strftime("%Y-%m-%d %H:%M:%S")}</td>
+                    </tr>
+                  </table>
+                  <div style="padding: 16px; border-radius: 12px; background: #f3f4f6;">
+                    <p style="margin: 0 0 8px; font-weight: 700;">Message</p>
+                    <p style="margin: 0; white-space: pre-wrap;">{message}</p>
+                  </div>
+                </div>
+            """,
+        }
+    )
