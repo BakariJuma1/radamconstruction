@@ -101,8 +101,11 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 space-y-2">
           <p>© {new Date().getFullYear()} Radamjaribu Builders. All rights reserved.</p>
+          <p className="text-sm text-gray-500">
+            Developed by JaribuTech Solutions
+          </p>
         </div>
       </div>
     </footer>
