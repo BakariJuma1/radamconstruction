@@ -138,9 +138,9 @@ const Navbar = () => {
         <div
           className={`${isOpen ? "block" : "hidden"} border-t border-slate-200 bg-white lg:hidden`}
         >
-          <div className="container mx-auto px-4 py-5 md:px-8">
-            <div className="rounded-3xl border border-slate-200 bg-stone-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+          <div className="container mx-auto px-4 py-4 md:px-8">
+            <div className="rounded-3xl border border-slate-200 bg-stone-50 p-4 sm:p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 sm:text-xs sm:tracking-[0.3em]">
                 Build With Confidence
               </p>
               <p className="mt-3 max-w-xl text-sm leading-6 text-slate-700">
@@ -156,7 +156,7 @@ const Navbar = () => {
                     <Link
                       key={item.href}
                       to={item.href}
-                      className={`rounded-2xl px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] ${
+                      className={`rounded-2xl px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] sm:tracking-[0.18em] ${
                         active
                           ? "bg-slate-900 text-white"
                           : "bg-white text-slate-700 hover:bg-slate-100"
@@ -168,46 +168,46 @@ const Navbar = () => {
                 })}
               </nav>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="mt-5 grid gap-3">
                 <Link
                   to="/hardware"
-                  className="rounded-2xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.16em] text-slate-700"
+                  className="rounded-2xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold uppercase tracking-[0.12em] text-slate-700 sm:tracking-[0.16em]"
                 >
                   Hardware Supplies
                 </Link>
                 <Link
                   to="/booking"
-                  className="rounded-2xl bg-amber-600 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.16em] text-white"
+                  className="rounded-2xl bg-amber-600 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.12em] text-white sm:tracking-[0.16em]"
                 >
                   Request Quote
                 </Link>
               </div>
 
-              <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
+              <div className="mt-5 grid gap-3 border-t border-slate-200 pt-4 sm:flex sm:items-center sm:justify-between">
                 {user ? (
-                  <>
+                  <div className="flex items-center justify-between gap-4">
                     <Link
                       to="/admin/dashboard"
-                      className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-700"
+                      className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-700"
                     >
                       Dashboard
                     </Link>
                     <button
                       onClick={logout}
-                      className="text-sm font-semibold uppercase tracking-[0.14em] text-rose-600"
+                      className="text-sm font-semibold uppercase tracking-[0.12em] text-rose-600"
                     >
                       Logout
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <Link
                     to="/login"
-                    className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-700"
+                    className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-700"
                   >
                     Login
                   </Link>
                 )}
-                <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 sm:text-right sm:tracking-[0.2em]">
                   Lugari, Kakamega
                 </span>
               </div>
