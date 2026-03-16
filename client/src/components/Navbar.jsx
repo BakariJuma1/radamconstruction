@@ -41,9 +41,9 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50">
       <div className="bg-slate-950 text-slate-200">
-        <div className="container mx-auto hidden items-center justify-between px-4 py-2 text-xs font-medium tracking-[0.2em] md:flex md:px-8 uppercase">
-          <p>Construction, plumbing, finishing, and hardware supply</p>
-          <p>Station Market, Lugari | Call +254 794 517 385</p>
+        <div className="container mx-auto hidden items-center justify-between px-4 py-2 text-[11px] font-medium tracking-[0.18em] lg:flex md:px-8 uppercase">
+          <p className="truncate">Construction, plumbing, finishing, and hardware supply</p>
+          <p className="truncate text-right">Station Market, Lugari | Call +254 794 517 385</p>
         </div>
       </div>
 
@@ -55,27 +55,27 @@ const Navbar = () => {
         }`}
       >
         <div className="container mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between gap-4 py-4">
-            <Link to="/" className="min-w-0 flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-sm border border-slate-900 bg-slate-900 text-2xl font-black text-white shadow-sm">
+          <div className="flex items-center justify-between gap-3 py-3 lg:gap-6 lg:py-4">
+            <Link to="/" className="min-w-0 flex-1 lg:flex-none">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-sm border border-slate-900 bg-slate-900 text-lg font-black text-white shadow-sm sm:h-12 sm:w-12 sm:text-xl lg:h-14 lg:w-14 lg:text-2xl">
                   R
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-amber-700">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-amber-700 sm:text-[10px] lg:text-[11px] lg:tracking-[0.35em]">
                     Since 2009
                   </p>
-                  <h1 className="truncate text-xl font-black uppercase tracking-[0.08em] text-slate-900 md:text-2xl">
+                  <h1 className="truncate text-sm font-black uppercase tracking-[0.03em] text-slate-900 sm:text-base md:text-xl lg:text-2xl lg:tracking-[0.08em]">
                     Radamjaribu Builders
                   </h1>
-                  <p className="truncate text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+                  <p className="hidden truncate text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 sm:block lg:text-xs lg:tracking-[0.18em]">
                     Construction and Hardware Supply
                   </p>
                 </div>
               </div>
             </Link>
 
-            <nav className="hidden items-center gap-2 xl:flex">
+            <nav className="hidden items-center gap-1 lg:flex xl:gap-2">
               {navItems.map((item) => {
                 const active = isActiveLink(item.href);
 
@@ -83,7 +83,7 @@ const Navbar = () => {
                   <Link
                     key={item.href}
                     to={item.href}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.18em] transition-colors duration-200 ${
+                    className={`rounded-full px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 xl:px-4 xl:text-sm xl:tracking-[0.18em] ${
                       active
                         ? "bg-slate-900 text-white"
                         : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
@@ -95,16 +95,16 @@ const Navbar = () => {
               })}
             </nav>
 
-            <div className="hidden items-center gap-3 xl:flex">
+            <div className="hidden items-center gap-2 lg:flex xl:gap-3">
               <Link
                 to="/hardware"
-                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold uppercase tracking-[0.16em] text-slate-700 transition hover:border-slate-900 hover:text-slate-900"
+                className="hidden rounded-full border border-slate-300 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-900 hover:text-slate-900 xl:inline-flex xl:px-4 xl:text-sm xl:tracking-[0.16em]"
               >
                 Hardware Supplies
               </Link>
               <Link
                 to="/booking"
-                className="rounded-full bg-amber-600 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-amber-700"
+                className="rounded-full bg-amber-600 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white transition hover:bg-amber-700 xl:px-5 xl:py-3 xl:text-sm xl:tracking-[0.18em]"
               >
                 Request Quote
               </Link>
@@ -112,13 +112,13 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/admin/dashboard"
-                    className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-700 transition hover:text-slate-900"
+                    className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 transition hover:text-slate-900 xl:text-sm xl:tracking-[0.14em]"
                   >
                     Dashboard
                   </Link>
                   <button
                     onClick={logout}
-                    className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 transition hover:text-rose-600"
+                    className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 transition hover:text-rose-600 xl:text-sm xl:tracking-[0.14em]"
                   >
                     Logout
                   </button>
@@ -126,23 +126,23 @@ const Navbar = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-700 transition hover:text-slate-900"
+                  className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 transition hover:text-slate-900 xl:text-sm xl:tracking-[0.14em]"
                 >
                   Login
                 </Link>
               )}
             </div>
 
-            <div className="flex items-center gap-3 xl:hidden">
+            <div className="flex items-center gap-2 lg:hidden">
               <Link
                 to="/booking"
-                className="hidden rounded-full bg-amber-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white sm:inline-flex"
+                className="hidden rounded-full bg-amber-600 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-white sm:inline-flex"
               >
                 Quote
               </Link>
               <button
                 onClick={() => setIsOpen((current) => !current)}
-                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900 transition hover:border-slate-900"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900 transition hover:border-slate-900 sm:h-12 sm:w-12"
                 aria-label="Toggle navigation menu"
               >
                 {isOpen ? <X size={22} /> : <Menu size={22} />}
@@ -152,7 +152,7 @@ const Navbar = () => {
         </div>
 
         <div
-          className={`overflow-hidden border-t border-slate-200 bg-white transition-all duration-300 xl:hidden ${
+          className={`overflow-hidden border-t border-slate-200 bg-white transition-all duration-300 lg:hidden ${
             isOpen ? "max-h-[520px]" : "max-h-0"
           }`}
         >

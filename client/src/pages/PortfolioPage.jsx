@@ -152,15 +152,15 @@ const PortfolioPage = () => {
       </section>
 
       {/* Category Filter */}
-      <section className="py-8 px-4 bg-white sticky top-0 z-10 shadow-sm">
+      <section className="bg-white px-4 py-6 shadow-sm lg:sticky lg:top-0 lg:z-10 lg:py-8">
         <div className="container mx-auto">
-          <h2 className="text-xl font-semibold text-center mb-6 text-gray-800">Browse Our Projects</h2>
+          <h2 className="mb-6 text-center text-lg font-semibold text-gray-800 sm:text-xl">Browse Our Projects</h2>
           <div className="flex flex-wrap justify-center gap-2 mb-6">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-full text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
                   selectedCategory === category
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -193,7 +193,7 @@ const PortfolioPage = () => {
               <p className="text-gray-500">We don't have any projects in this category yet.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredItems.map((project) => (
                 <div
                   key={project.id}
@@ -201,7 +201,7 @@ const PortfolioPage = () => {
                   onClick={() => openProjectModal(project)}
                 >
                   {/* Image Container */}
-                  <div className="relative h-48 bg-gray-100">
+                  <div className="relative h-56 bg-gray-100 sm:h-64">
                     {project.allImages && project.allImages.length > 0 ? (
                       <>
                         <ImageWithFallback

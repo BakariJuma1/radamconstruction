@@ -83,13 +83,13 @@ export default function HardwarePage() {
     <div className="min-h-screen bg-slate-50">
       <section className="bg-gradient-to-r from-emerald-900 via-slate-900 to-blue-900 py-16 text-white">
         <div className="container mx-auto px-4 md:px-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-300">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300 sm:text-sm sm:tracking-[0.3em]">
             Hardware Catalog
           </p>
-          <h1 className="mt-3 text-4xl font-bold md:text-5xl">
+          <h1 className="mt-3 text-3xl font-bold sm:text-4xl md:text-5xl">
             Construction, plumbing, and finishing materials
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-200">
+          <p className="mt-5 max-w-2xl text-base text-slate-200 sm:text-lg">
             This is the catalog and RFQ phase, not full e-commerce. Clients can
             browse categories, send lists, and request pricing or delivery.
           </p>
@@ -99,8 +99,8 @@ export default function HardwarePage() {
       <section className="container mx-auto grid gap-8 px-4 py-12 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="grid gap-6 md:grid-cols-2">
           {mergedCategories.map((category) => (
-            <article key={category.id} className="rounded-3xl bg-white p-6 shadow-lg">
-              <h2 className="text-2xl font-semibold text-slate-900">
+            <article key={category.id} className="rounded-3xl bg-white p-5 shadow-lg sm:p-6">
+              <h2 className="text-xl font-semibold text-slate-900 sm:text-2xl">
                 {category.title}
               </h2>
               {category.description ? (
@@ -115,7 +115,7 @@ export default function HardwarePage() {
                     {typeof item === "string" ? (
                       item
                     ) : (
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex items-start gap-3">
                           {item.image_url ? (
                             <img
@@ -134,7 +134,7 @@ export default function HardwarePage() {
                           </div>
                         </div>
                         {item.price || item.unit ? (
-                          <span className="text-xs font-semibold text-blue-700 whitespace-nowrap">
+                          <span className="text-xs font-semibold text-blue-700 sm:whitespace-nowrap">
                             {item.price
                               ? `KES ${Number(item.price).toLocaleString()}`
                               : "Price on request"}
