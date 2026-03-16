@@ -298,7 +298,9 @@ export default function HomePage() {
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-300">
                 Case Studies
               </p>
-              <h2 className="mt-2 text-3xl font-bold">Show real outcomes, not just gallery images</h2>
+              <h2 className="mt-2 text-3xl font-bold">
+                See the standard of work before you request a quotation
+              </h2>
             </div>
             <a href="/portfolio" className="font-semibold text-amber-300">
               View portfolio
@@ -309,23 +311,30 @@ export default function HomePage() {
               <article key={item.id} className="rounded-3xl bg-white/10 p-6 backdrop-blur">
                 <h3 className="text-xl font-semibold">{item.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-slate-200">{item.summary}</p>
-                <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-2xl bg-white/10 p-3">
-                    <span className="block text-slate-300">Timeline</span>
-                    <strong>{item.timeline}</strong>
-                  </div>
-                  <div className="rounded-2xl bg-white/10 p-3">
-                    <span className="block text-slate-300">Budget</span>
-                    <strong>{item.budget}</strong>
-                  </div>
+                <div className="mt-5 rounded-2xl bg-white/10 p-4">
+                  <span className="block text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
+                    Project outcome
+                  </span>
+                  <p className="mt-2 text-sm text-amber-100">{item.impact}</p>
                 </div>
-                <p className="mt-4 text-sm text-amber-200">{item.impact}</p>
               </article>
             ))}
           </div>
 
           {!isLoadingPortfolio && portfolio.length > 0 ? (
-            <div className="mt-8 grid gap-6 lg:grid-cols-3">
+            <div className="mt-8">
+              <div className="mb-6 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-300">
+                    Project Gallery
+                  </p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">
+                    Real images from completed and ongoing works
+                  </h3>
+                </div>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-3">
               {portfolio.map((project) => (
                 <article
                   key={project.id}
@@ -355,9 +364,26 @@ export default function HomePage() {
                       {project.title || project.tittle}
                     </h3>
                     <p className="mt-3 text-sm text-slate-600">{project.description}</p>
+                    {project.images && project.images.length > 1 ? (
+                      <div className="mt-4 grid grid-cols-3 gap-2">
+                        {project.images.slice(0, 3).map((image, index) => (
+                          <div
+                            key={image.id || index}
+                            className="h-20 overflow-hidden rounded-xl bg-slate-100"
+                          >
+                            <img
+                              src={image.image_url}
+                              alt={`${project.title || project.tittle} ${index + 1}`}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </article>
               ))}
+              </div>
             </div>
           ) : null}
         </div>
@@ -398,18 +424,18 @@ export default function HomePage() {
                 Hardware Store
               </p>
               <h2 className="mt-2 text-3xl font-bold">
-                Start with a category catalog and RFQ, then grow into full commerce later
+                Check available supplies and request pricing directly from the store
               </h2>
               <p className="mt-4 max-w-2xl text-slate-300">
-                The new hardware page lets customers ask for price, availability,
-                and delivery without waiting for cart, payment, and stock sync work.
+                Browse construction, plumbing, and finishing supplies, then send
+                your list for pricing, availability, and delivery options.
               </p>
             </div>
             <a
               href="/hardware"
               className="inline-flex items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-slate-900 transition hover:bg-amber-200"
             >
-              Open hardware catalog
+              View hardware supplies
             </a>
           </div>
         </div>

@@ -7,12 +7,15 @@ const Footer = () => {
         <div className="container mx-auto grid gap-6 px-4 py-10 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-300">
-              Visit Our Location
+              Visit Our Office and Store
             </p>
-            <h2 className="mt-3 text-3xl font-bold">Find us at Station Market, Lugari</h2>
+            <h2 className="mt-3 text-3xl font-bold">
+              Stop by for quotations, consultations, and materials inquiries
+            </h2>
             <p className="mt-4 max-w-xl text-gray-300">
-              Visit the office and hardware store for quotations, construction
-              consultations, and materials inquiries.
+              Visit our location at Station Market, Lugari to discuss your
+              project, request a quotation, or check hardware and construction
+              supplies in person.
             </p>
             <div className="mt-5 text-sm text-gray-300">
               <p>Station Market, Lugari, Kakamega</p>
