@@ -962,7 +962,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row overflow-x-hidden">
       {/* Main Content */}
-      <div className="order-2 flex-1 md:ml-0 min-w-0 pb-20 md:pb-0 md:pl-80">
+      <div className="order-2 flex-1 min-w-0 pb-20 md:pb-0 md:pl-80">
         {/* Sticky Header */}
         <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
           <div className="px-4 py-4 sm:px-6 flex justify-between items-center gap-3">
@@ -2517,7 +2517,7 @@ const AdminDashboard = () => {
       {/* Enhanced Sidebar */}
       <div
         className={`
-        order-1 fixed inset-y-0 left-0 z-40 w-80 transform border-r border-slate-200 bg-white text-slate-900 shadow-lg transition-transform duration-300 ease-in-out
+        order-1 fixed inset-x-0 top-[76px] bottom-0 left-0 z-30 w-full transform border-r border-slate-200 bg-white text-slate-900 shadow-lg transition-transform duration-300 ease-in-out md:inset-x-auto md:top-[112px] md:w-80
         ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }

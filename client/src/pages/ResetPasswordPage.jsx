@@ -45,10 +45,10 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-6 sm:py-10">
+      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-lg sm:p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Choose a New Password</h1>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Choose a New Password</h1>
           <p className="mt-2 text-sm text-gray-600">
             Set a new password for your account.
           </p>
@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
           </div>
         ) : null}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               New password

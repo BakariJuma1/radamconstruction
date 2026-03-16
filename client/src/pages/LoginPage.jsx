@@ -50,11 +50,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+      <div className="w-full max-w-md space-y-5 sm:space-y-8">
         <div>
           <div className="text-center">
-            <div className="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-lg bg-blue-600 sm:h-12 sm:w-12">
               <svg
                 className="w-6 h-6 text-white"
                 fill="none"
@@ -69,7 +69,7 @@ export default function LoginPage() {
                 />
               </svg>
             </div>
-            <h2 className="mt-6 text-3xl font-bold text-gray-900">
+            <h2 className="mt-4 text-2xl font-bold text-gray-900 sm:mt-6 sm:text-3xl">
               Sign in to your account
             </h2>
             <p className="mt-2 text-sm text-gray-600">
@@ -78,8 +78,8 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="rounded-lg bg-white px-4 py-5 shadow sm:px-6 sm:py-8 md:px-8">
+          <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
                 {error}
@@ -137,7 +137,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center">
                 <input
                   id="remember-me"
@@ -153,7 +153,7 @@ export default function LoginPage() {
                 </label>
               </div>
 
-              <div className="text-sm">
+              <div className="text-sm sm:text-right">
                 <Link
                   to="/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500"
