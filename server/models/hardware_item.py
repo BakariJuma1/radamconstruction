@@ -10,6 +10,7 @@ class HardwareItem(db.Model):
     description = db.Column(db.Text, nullable=True)
     price = db.Column(db.Float, nullable=True)
     unit = db.Column(db.String(50), nullable=True)
+    image_url = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     category_id = db.Column(
@@ -24,6 +25,7 @@ class HardwareItem(db.Model):
             "description": self.description,
             "price": self.price,
             "unit": self.unit,
+            "image_url": self.image_url,
             "category_id": self.category_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

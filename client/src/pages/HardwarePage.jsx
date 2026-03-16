@@ -102,13 +102,22 @@ export default function HardwarePage() {
                       item
                     ) : (
                       <div className="flex items-start justify-between gap-3">
-                        <div>
+                        <div className="flex items-start gap-3">
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              className="h-16 w-16 rounded-lg object-cover flex-shrink-0"
+                            />
+                          ) : null}
+                          <div>
                           <p className="font-medium text-slate-900">{item.name}</p>
                           {item.description ? (
                             <p className="mt-1 text-xs text-slate-500">
                               {item.description}
                             </p>
                           ) : null}
+                          </div>
                         </div>
                         {item.price || item.unit ? (
                           <span className="text-xs font-semibold text-blue-700 whitespace-nowrap">

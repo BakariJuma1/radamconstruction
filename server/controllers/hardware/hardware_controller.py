@@ -3,6 +3,7 @@ from flask_restful import Api, Resource
 from flask_jwt_extended import jwt_required
 from server.extension import db
 from server.models import HardwareCategory, HardwareItem
+from server.service.cloudinary_service import upload_files_to_cloudinary
 from . import hardware_bp
 
 api = Api(hardware_bp)
@@ -68,7 +69,13 @@ class HardwareCategoryResource(Resource):
 class HardwareItemListResource(Resource):
     @jwt_required()
     def post(self):
-        data = request.get_json() or {}
+        if request.content_type and "multipart/form-data" in request.content_type:
+            data = request.form
+            image = request.files.get("image")
+        else:
+            data = request.get_json() or {}
+            image = None
+
         name = (data.get("name") or "").strip()
         description = (data.get("description") or "").strip()
         unit = (data.get("unit") or "").strip()
@@ -81,11 +88,20 @@ class HardwareItemListResource(Resource):
             return {"error": "Category is required"}, 400
 
         category = HardwareCategory.query.get_or_404(category_id)
+        image_url = None
+
+        if image:
+            uploaded = upload_files_to_cloudinary(
+                image, folder="radam-construction/hardware"
+            )
+            image_url = uploaded[0]["secure_url"]
+
         item = HardwareItem(
             name=name,
             description=description or None,
             unit=unit or None,
             price=float(price) if price not in (None, "") else None,
+            image_url=image_url,
             category=category,
         )
         db.session.add(item)
@@ -98,7 +114,12 @@ class HardwareItemResource(Resource):
     @jwt_required()
     def put(self, item_id):
         item = HardwareItem.query.get_or_404(item_id)
-        data = request.get_json() or {}
+        if request.content_type and "multipart/form-data" in request.content_type:
+            data = request.form
+            image = request.files.get("image")
+        else:
+            data = request.get_json() or {}
+            image = None
 
         name = (data.get("name") or "").strip()
         description = (data.get("description") or "").strip()
@@ -114,6 +135,11 @@ class HardwareItemResource(Resource):
 
         if category_id:
             item.category = HardwareCategory.query.get_or_404(category_id)
+        if image:
+            uploaded = upload_files_to_cloudinary(
+                image, folder="radam-construction/hardware"
+            )
+            item.image_url = uploaded[0]["secure_url"]
 
         db.session.commit()
         return item.to_dict(), 200

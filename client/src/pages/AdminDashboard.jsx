@@ -40,13 +40,16 @@ const AdminDashboard = () => {
     name: "",
     description: "",
   });
+  const [editingHardwareCategoryId, setEditingHardwareCategoryId] = useState(null);
   const [newHardwareItem, setNewHardwareItem] = useState({
     category_id: "",
     name: "",
     description: "",
     price: "",
     unit: "",
+    image: null,
   });
+  const [editingHardwareItemId, setEditingHardwareItemId] = useState(null);
 
   // Toggle item expansion for mobile
   const toggleItemExpansion = (itemId) => {
@@ -428,19 +431,26 @@ const AdminDashboard = () => {
 
     setLoading(true);
     try {
-      await axios.post(
-        "https://radamconstruction.onrender.com/hardware-categories",
-        newHardwareCategory,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const endpoint = editingHardwareCategoryId
+        ? `https://radamconstruction.onrender.com/hardware-categories/${editingHardwareCategoryId}`
+        : "https://radamconstruction.onrender.com/hardware-categories";
+      const method = editingHardwareCategoryId ? "put" : "post";
+
+      await axios[method](endpoint, newHardwareCategory, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       setNewHardwareCategory({ name: "", description: "" });
+      setEditingHardwareCategoryId(null);
       await refreshHardwareCategories();
-      showMessage("Hardware category added", "success");
+      showMessage(
+        editingHardwareCategoryId
+          ? "Hardware category updated"
+          : "Hardware category added",
+        "success"
+      );
     } catch (error) {
       console.error("Error creating hardware category:", error);
       showMessage(
@@ -459,25 +469,40 @@ const AdminDashboard = () => {
 
     setLoading(true);
     try {
-      await axios.post(
-        "https://radamconstruction.onrender.com/hardware-items",
-        newHardwareItem,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const endpoint = editingHardwareItemId
+        ? `https://radamconstruction.onrender.com/hardware-items/${editingHardwareItemId}`
+        : "https://radamconstruction.onrender.com/hardware-items";
+      const method = editingHardwareItemId ? "put" : "post";
+      const formData = new FormData();
+      formData.append("category_id", newHardwareItem.category_id);
+      formData.append("name", newHardwareItem.name);
+      formData.append("description", newHardwareItem.description);
+      formData.append("price", newHardwareItem.price);
+      formData.append("unit", newHardwareItem.unit);
+      if (newHardwareItem.image) {
+        formData.append("image", newHardwareItem.image);
+      }
+
+      await axios[method](endpoint, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setNewHardwareItem({
         category_id: "",
         name: "",
         description: "",
         price: "",
         unit: "",
+        image: null,
       });
+      setEditingHardwareItemId(null);
       await refreshHardwareCategories();
-      showMessage("Hardware item added", "success");
+      showMessage(
+        editingHardwareItemId ? "Hardware item updated" : "Hardware item added",
+        "success"
+      );
     } catch (error) {
       console.error("Error creating hardware item:", error);
       showMessage(
@@ -487,6 +512,43 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const startHardwareCategoryEdit = (category) => {
+    setEditingHardwareCategoryId(category.id);
+    setNewHardwareCategory({
+      name: category.name || "",
+      description: category.description || "",
+    });
+  };
+
+  const startHardwareItemEdit = (item) => {
+    setEditingHardwareItemId(item.id);
+    setNewHardwareItem({
+      category_id: item.category_id ? String(item.category_id) : "",
+      name: item.name || "",
+      description: item.description || "",
+      price: item.price ?? "",
+      unit: item.unit || "",
+      image: null,
+    });
+  };
+
+  const cancelHardwareCategoryEdit = () => {
+    setEditingHardwareCategoryId(null);
+    setNewHardwareCategory({ name: "", description: "" });
+  };
+
+  const cancelHardwareItemEdit = () => {
+    setEditingHardwareItemId(null);
+    setNewHardwareItem({
+      category_id: "",
+      name: "",
+      description: "",
+      price: "",
+      unit: "",
+      image: null,
+    });
   };
 
   const handleSettingsSave = async (e) => {
@@ -1413,7 +1475,9 @@ const AdminDashboard = () => {
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    Add Hardware Category
+                    {editingHardwareCategoryId
+                      ? "Edit Hardware Category"
+                      : "Add Hardware Category"}
                   </h3>
                   <form onSubmit={handleHardwareCategorySubmit} className="space-y-4">
                     <input
@@ -1446,14 +1510,23 @@ const AdminDashboard = () => {
                       disabled={loading}
                       className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                     >
-                      Add Category
+                      {editingHardwareCategoryId ? "Save Category" : "Add Category"}
                     </button>
+                    {editingHardwareCategoryId ? (
+                      <button
+                        type="button"
+                        onClick={cancelHardwareCategoryEdit}
+                        className="w-full sm:w-auto sm:ml-3 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    ) : null}
                   </form>
                 </div>
 
                 <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    Add Hardware Item
+                    {editingHardwareItemId ? "Edit Hardware Item" : "Add Hardware Item"}
                   </h3>
                   <form onSubmit={handleHardwareItemSubmit} className="space-y-4">
                     <select
@@ -1525,13 +1598,76 @@ const AdminDashboard = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg"
                       placeholder="Optional item description"
                     />
+                    <div>
+                      <label
+                        htmlFor="hardware-item-image"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Item Image
+                      </label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors duration-200">
+                        <input
+                          type="file"
+                          id="hardware-item-image"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={(e) =>
+                            setNewHardwareItem({
+                              ...newHardwareItem,
+                              image: e.target.files?.[0] || null,
+                            })
+                          }
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="hardware-item-image"
+                          className="cursor-pointer"
+                        >
+                          <div className="text-gray-400 mb-2">
+                            <svg
+                              className="w-8 h-8 mx-auto"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 7h4l2-2h6l2 2h4v12H3V7zm9 9a4 4 0 100-8 4 4 0 000 8z"
+                              />
+                            </svg>
+                          </div>
+                          <span className="text-sm text-gray-600">
+                            Upload image or use camera
+                          </span>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Mobile devices can open the camera directly here
+                          </p>
+                        </label>
+                      </div>
+                      {newHardwareItem.image ? (
+                        <p className="text-sm text-green-600 mt-2">
+                          Selected: {newHardwareItem.image.name}
+                        </p>
+                      ) : null}
+                    </div>
                     <button
                       type="submit"
                       disabled={loading}
                       className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                     >
-                      Add Item
+                      {editingHardwareItemId ? "Save Item" : "Add Item"}
                     </button>
+                    {editingHardwareItemId ? (
+                      <button
+                        type="button"
+                        onClick={cancelHardwareItemEdit}
+                        className="w-full sm:w-auto sm:ml-3 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    ) : null}
                   </form>
                 </div>
               </div>
@@ -1562,12 +1698,20 @@ const AdminDashboard = () => {
                             </p>
                           ) : null}
                         </div>
-                        <button
-                          onClick={() => deleteItem("hardware-category", category.id)}
-                          className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 text-sm font-medium"
-                        >
-                          Delete Category
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => startHardwareCategoryEdit(category)}
+                            className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm font-medium"
+                          >
+                            Edit Category
+                          </button>
+                          <button
+                            onClick={() => deleteItem("hardware-category", category.id)}
+                            className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 text-sm font-medium"
+                          >
+                            Delete Category
+                          </button>
+                        </div>
                       </div>
 
                       <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -1581,6 +1725,13 @@ const AdminDashboard = () => {
                               key={item.id}
                               className="rounded-lg border border-gray-200 p-4 bg-gray-50"
                             >
+                              {item.image_url ? (
+                                <img
+                                  src={item.image_url}
+                                  alt={item.name}
+                                  className="w-full h-32 object-cover rounded-lg mb-3"
+                                />
+                              ) : null}
                               <div className="flex items-start justify-between gap-3">
                                 <div>
                                   <h5 className="font-semibold text-gray-900">
@@ -1600,12 +1751,20 @@ const AdminDashboard = () => {
                                     </p>
                                   ) : null}
                                 </div>
-                                <button
-                                  onClick={() => deleteItem("hardware-item", item.id)}
-                                  className="text-red-600 text-sm font-medium"
-                                >
-                                  Delete
-                                </button>
+                                <div className="flex flex-col items-end gap-2">
+                                  <button
+                                    onClick={() => startHardwareItemEdit(item)}
+                                    className="text-blue-600 text-sm font-medium"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => deleteItem("hardware-item", item.id)}
+                                    className="text-red-600 text-sm font-medium"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           ))
