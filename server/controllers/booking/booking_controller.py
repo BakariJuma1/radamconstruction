@@ -3,6 +3,7 @@ from flask_restful import Resource,Api
 from flask_jwt_extended import jwt_required
 from server.extension import db
 from server.models import Service, Booking
+from server.service.notification_service import send_new_booking_notification
 from . import booking_bp
 
 api = Api(booking_bp)
@@ -14,15 +15,26 @@ class BookingListResource(Resource):
 
     def post(self):
         data = request.get_json()
+        service_id = data.get("service_id")
+        service = Service.query.get(service_id) if service_id else None
+
         booking = Booking(
             name=data.get("name"),
             phone=data.get("phone"),
             email=data.get("email"),
             message=data.get("message"),
-            service_id=data.get("service_id")
+            service_id=service.id if service else None
         )
         db.session.add(booking)
         db.session.commit()
+
+        try:
+            send_new_booking_notification(booking)
+        except RuntimeError as error:
+            print(f"Booking notification skipped: {error}")
+        except Exception as error:
+            print(f"Booking notification failed: {error}")
+
         return booking.to_dict(rules=("-service.bookings",)), 201
 
 

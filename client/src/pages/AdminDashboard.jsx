@@ -12,6 +12,7 @@ const AdminDashboard = () => {
   const [services, setServices] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
   const [hardwareCategories, setHardwareCategories] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [siteSettings, setSiteSettings] = useState({
     whatsapp_number: "",
     google_business_name: "",
@@ -29,6 +30,8 @@ const AdminDashboard = () => {
     price: "",
     images: [],
   });
+  const [editingServiceId, setEditingServiceId] = useState(null);
+  const [serviceImagePreview, setServiceImagePreview] = useState("");
 
   // New portfolio item form state
   const [newPortfolio, setNewPortfolio] = useState({
@@ -50,6 +53,12 @@ const AdminDashboard = () => {
     image: null,
   });
   const [editingHardwareItemId, setEditingHardwareItemId] = useState(null);
+  const [newTeamMember, setNewTeamMember] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [editingTeamMemberId, setEditingTeamMemberId] = useState(null);
 
   // Toggle item expansion for mobile
   const toggleItemExpansion = (itemId) => {
@@ -187,6 +196,13 @@ const AdminDashboard = () => {
                   settingsRes.data.google_reviews_json || "",
               });
               break;
+            case "team":
+              const teamRes = await axios.get(
+                "https://radamconstruction.onrender.com/users",
+                config
+              );
+              setTeamMembers(teamRes.data);
+              break;
             default:
               break;
           }
@@ -213,6 +229,26 @@ const AdminDashboard = () => {
     setTimeout(() => setMessage({ text: "", type: "" }), 4000);
   };
 
+  useEffect(() => {
+    if (newService.images.length === 0) {
+      setServiceImagePreview("");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(newService.images[0]);
+    setServiceImagePreview(previewUrl);
+
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [newService.images]);
+
+  const resetServiceForm = () => {
+    setNewService({ title: "", description: "", price: "", images: [] });
+    setServiceImagePreview("");
+    setEditingServiceId(null);
+  };
+
   const handleServiceSubmit = async (e) => {
     e.preventDefault();
 
@@ -233,32 +269,41 @@ const AdminDashboard = () => {
       });
 
       await apiCallWithRetry(async () => {
-        await axios.post(
-          "https://radamconstruction.onrender.com/services",
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const endpoint = editingServiceId
+          ? `https://radamconstruction.onrender.com/services/${editingServiceId}`
+          : "https://radamconstruction.onrender.com/services";
+        const method = editingServiceId ? "put" : "post";
+
+        await axios[method](endpoint, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
       });
 
-      showMessage("Service created successfully", "success");
-      setNewService({ title: "", description: "", price: "", images: [] });
+      showMessage(
+        editingServiceId
+          ? "Service updated successfully"
+          : "Service created successfully",
+        "success"
+      );
+      resetServiceForm();
 
       const servicesRes = await axios.get(
         "https://radamconstruction.onrender.com/services"
       );
       setServices(servicesRes.data);
     } catch (error) {
-      console.error("Error creating service:", error);
+      console.error("Error saving service:", error);
       if (error.response?.status === 401) {
         showMessage("Session expired. Please log in again.", "error");
         logout();
       } else {
-        showMessage("Error creating service", "error");
+        showMessage(
+          error.response?.data?.error || "Error saving service",
+          "error"
+        );
       }
     } finally {
       setLoading(false);
@@ -369,6 +414,9 @@ const AdminDashboard = () => {
         case "hardware-item":
           endpoint = `https://radamconstruction.onrender.com/hardware-items/${id}`;
           break;
+        case "team-member":
+          endpoint = `https://radamconstruction.onrender.com/users/${id}`;
+          break;
         default:
           return;
       }
@@ -392,6 +440,12 @@ const AdminDashboard = () => {
         case "hardware-category":
         case "hardware-item":
           await refreshHardwareCategories();
+          break;
+        case "team-member":
+          setTeamMembers(teamMembers.filter((member) => member.id !== id));
+          if (editingTeamMemberId === id) {
+            resetTeamMemberForm();
+          }
           break;
         default:
           break;
@@ -422,6 +476,17 @@ const AdminDashboard = () => {
       "https://radamconstruction.onrender.com/hardware-categories"
     );
     setHardwareCategories(response.data);
+  };
+
+  const startServiceEdit = (service) => {
+    setEditingServiceId(service.id);
+    setNewService({
+      title: service.name || "",
+      description: service.description || "",
+      price: service.price || "",
+      images: [],
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleHardwareCategorySubmit = async (e) => {
@@ -591,6 +656,72 @@ const AdminDashboard = () => {
     }
   };
 
+  const refreshTeamMembers = async () => {
+    const response = await axios.get(
+      "https://radamconstruction.onrender.com/users",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    setTeamMembers(response.data);
+  };
+
+  const resetTeamMemberForm = () => {
+    setNewTeamMember({
+      username: "",
+      email: "",
+      password: "",
+    });
+    setEditingTeamMemberId(null);
+  };
+
+  const handleTeamMemberSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateAuth()) return;
+
+    setLoading(true);
+    try {
+      const endpoint = editingTeamMemberId
+        ? `https://radamconstruction.onrender.com/users/${editingTeamMemberId}`
+        : "https://radamconstruction.onrender.com/users";
+      const method = editingTeamMemberId ? "put" : "post";
+
+      await axios[method](endpoint, newTeamMember, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      await refreshTeamMembers();
+      showMessage(
+        editingTeamMemberId
+          ? "Team member updated"
+          : "Team member added",
+        "success"
+      );
+      resetTeamMemberForm();
+    } catch (error) {
+      console.error("Error saving team member:", error);
+      showMessage(
+        error.response?.data?.error || "Error saving team member",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startTeamMemberEdit = (member) => {
+    setEditingTeamMemberId(member.id);
+    setNewTeamMember({
+      username: member.username || "",
+      email: member.email || "",
+      password: "",
+    });
+  };
+
   // Status badge component
   const StatusBadge = ({ status }) => {
     const statusConfig = {
@@ -637,22 +768,77 @@ const AdminDashboard = () => {
   // Empty state component
   const EmptyState = ({ message, icon }) => (
     <div className="text-center py-12 px-4">
-      <div className="text-gray-400 text-4xl mb-4">{icon}</div>
+      {icon ? <div className="text-gray-400 text-4xl mb-4">{icon}</div> : null}
       <p className="text-gray-500 text-lg">{message}</p>
     </div>
   );
 
+  const navTabs = [
+    { id: "bookings", label: "Bookings", tone: "from-sky-500 to-blue-600" },
+    { id: "contacts", label: "Contacts", tone: "from-emerald-500 to-teal-600" },
+    { id: "services", label: "Services", tone: "from-amber-500 to-orange-600" },
+    { id: "portfolio", label: "Portfolio", tone: "from-fuchsia-500 to-pink-600" },
+    { id: "hardware", label: "Hardware", tone: "from-violet-500 to-purple-600" },
+    { id: "team", label: "Team", tone: "from-cyan-500 to-sky-600" },
+    { id: "settings", label: "Settings", tone: "from-slate-500 to-slate-700" },
+  ];
+
+  const activeTabMeta =
+    navTabs.find((tab) => tab.id === activeTab) || navTabs[0];
+
+  const totalManagedItems =
+    bookings.length +
+    contacts.length +
+    services.length +
+    portfolio.length +
+    teamMembers.length +
+    hardwareCategories.reduce(
+      (total, category) => total + 1 + category.items.length,
+      0
+    );
+
+  const summaryCards = [
+    {
+      label: "Bookings",
+      value: bookings.length,
+      helper: "Incoming quote and site visit requests",
+    },
+    {
+      label: "Contacts",
+      value: contacts.length,
+      helper: "Direct messages from the contact form",
+    },
+    {
+      label: "Catalog",
+      value:
+        services.length +
+        portfolio.length +
+        hardwareCategories.reduce((total, category) => total + category.items.length, 0),
+      helper: "Services, projects, and hardware items",
+    },
+    {
+      label: "Categories",
+      value: hardwareCategories.length,
+      helper: "Hardware sections currently managed",
+    },
+    {
+      label: "Team",
+      value: teamMembers.length,
+      helper: "Staff accounts receiving booking notifications",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row">
       {/* Main Content */}
-      <div className="flex-1 md:ml-0 min-w-0 pb-20 md:pb-0">
+      <div className="order-2 flex-1 md:ml-0 min-w-0 pb-20 md:pb-0 md:pl-80">
         {/* Sticky Header */}
-        <header className="bg-white shadow-sm sticky top-0 z-20 border-b border-gray-200">
+        <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
           <div className="px-4 sm:px-6 py-4 flex justify-between items-center">
             {/* Hamburger menu button for mobile, now inside header */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="md:hidden mr-4 p-3 rounded-full bg-blue-600 text-white shadow-lg"
+              className="md:hidden mr-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg"
               aria-label="Toggle menu"
             >
               <svg
@@ -669,47 +855,85 @@ const AdminDashboard = () => {
                 />
               </svg>
             </button>
-            <h2 className="text-xl font-semibold text-gray-800 capitalize flex items-center">
-              <span className="hidden sm:inline mr-2">Manage</span>
-              {activeTab}
-            </h2>
-            <div className="flex items-center space-x-3">
-              <div className="md:hidden text-right">
-                {user && (
-                  <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                    {user.name || user.email}
-                  </span>
-                )}
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                Control Center
+              </p>
+              <h2 className="mt-1 text-xl font-semibold text-slate-900 capitalize">
+                {activeTabMeta.label}
+              </h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
+                <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                  {user?.name?.[0] || user?.email?.[0] || "A"}
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-slate-900">
+                    {user?.name || "Administrator"}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate max-w-[180px]">
+                    {user?.email}
+                  </p>
+                </div>
               </div>
-              <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {bookings.length +
-                  contacts.length +
-                  services.length +
-                  portfolio.length +
-                  hardwareCategories.reduce(
-                    (total, category) => total + 1 + category.items.length,
-                    0
-                  )}{" "}
-                items
+              <div className="rounded-2xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg">
+                {totalManagedItems} records
               </div>
             </div>
           </div>
         </header>
 
         <main className="p-4 sm:p-6 overflow-x-hidden">
+          <section className="mb-6 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-200 px-6 py-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                    Admin Workspace
+                  </p>
+                  <h1 className="mt-2 text-3xl font-bold text-slate-900">
+                    Manage {activeTabMeta.label.toLowerCase()} with fewer clicks
+                  </h1>
+                  <p className="mt-3 max-w-2xl text-sm text-slate-600">
+                    Review activity, update content, and keep the site current from one dashboard.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {summaryCards.map((card) => (
+                    <div
+                      key={card.label}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+                    >
+                      <div className="text-2xl font-bold text-slate-900">{card.value}</div>
+                      <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {card.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-3 px-6 py-4 text-sm text-slate-600 md:grid-cols-4 bg-slate-50/70">
+              {summaryCards.map((card) => (
+                <div key={`${card.label}-helper`} className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <p className="font-semibold text-slate-900">{card.label}</p>
+                  <p className="mt-1">{card.helper}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {/* Enhanced Message Alert */}
           {message.text && (
             <div
-              className={`mb-6 p-4 rounded-lg border-l-4 ${
+              className={`mb-6 rounded-2xl p-4 border-l-4 shadow-sm ${
                 message.type === "success"
                   ? "bg-green-50 text-green-800 border-green-400"
                   : "bg-red-50 text-red-800 border-red-400"
-              } shadow-sm`}
+              }`}
             >
               <div className="flex items-center">
-                <span className="text-lg mr-3">
-                  {message.type === "success" ? "✅" : "⚠️"}
-                </span>
                 <span className="font-medium">{message.text}</span>
               </div>
             </div>
@@ -722,7 +946,6 @@ const AdminDashboard = () => {
           {!token && !loading && (
             <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-lg shadow-sm">
               <div className="flex items-center">
-                <span className="text-lg mr-3">🔒</span>
                 <span>Please log in to access the admin dashboard.</span>
               </div>
             </div>
@@ -732,14 +955,13 @@ const AdminDashboard = () => {
           {activeTab === "bookings" && token && !loading && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <span className="mr-2">📅</span>
+                <h3 className="text-lg font-semibold text-gray-800">
                   Booking Requests ({bookings.length})
                 </h3>
               </div>
               <div className="divide-y divide-gray-200">
                 {bookings.length === 0 ? (
-                  <EmptyState message="No booking requests found" icon="📭" />
+                  <EmptyState message="No booking requests found" icon="" />
                 ) : (
                   bookings.map((booking) => (
                     <MobileTableRow
@@ -808,7 +1030,7 @@ const AdminDashboard = () => {
                               Service:
                             </span>
                             <span className="ml-2 text-gray-900">
-                              {booking.service_id || "Not specified"}
+                              {booking.service?.name || "Not specified"}
                             </span>
                           </div>
                         </div>
@@ -864,14 +1086,13 @@ const AdminDashboard = () => {
           {activeTab === "contacts" && token && !loading && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="p-4 sm:p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <span className="mr-2">📞</span>
+                <h3 className="text-lg font-semibold text-gray-800">
                   Contact Messages ({contacts.length})
                 </h3>
               </div>
               <div className="divide-y divide-gray-200">
                 {contacts.length === 0 ? (
-                  <EmptyState message="No contact messages found" icon="📭" />
+                  <EmptyState message="No contact messages found" icon="" />
                 ) : (
                   contacts.map((contact) => (
                     <MobileTableRow
@@ -992,9 +1213,8 @@ const AdminDashboard = () => {
             <div className="space-y-6">
               {/* Enhanced Add New Service Form */}
               <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <span className="mr-2">🛠️</span>
-                  Add New Service
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  {editingServiceId ? "Edit Service" : "Add New Service"}
                 </h3>
                 <form onSubmit={handleServiceSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1025,7 +1245,7 @@ const AdminDashboard = () => {
                         htmlFor="price"
                         className="block text-sm font-medium text-gray-700 mb-2"
                       >
-                        Price
+                        Internal Price Reference
                       </label>
                       <input
                         type="text"
@@ -1038,8 +1258,12 @@ const AdminDashboard = () => {
                           })
                         }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                        placeholder="Enter price (optional)"
+                        placeholder="Optional internal reference"
                       />
+                      <p className="text-xs text-gray-500 mt-2">
+                        This stays in admin only and is not shown on the public
+                        services page.
+                      </p>
                     </div>
                   </div>
                   <div>
@@ -1069,7 +1293,9 @@ const AdminDashboard = () => {
                       htmlFor="service-images"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      Images
+                      {editingServiceId
+                        ? "Replace Service Image"
+                        : "Service Image"}
                     </label>
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors duration-200">
                       <input
@@ -1101,46 +1327,95 @@ const AdminDashboard = () => {
                           </svg>
                         </div>
                         <span className="text-sm text-gray-600">
-                          Click to upload images
+                          {editingServiceId
+                            ? "Click to replace the current image"
+                            : "Click to upload an image"}
                         </span>
                         <p className="text-xs text-gray-500 mt-1">
                           PNG, JPG, GIF up to 10MB
                         </p>
                       </label>
                     </div>
+                    {editingServiceId &&
+                      newService.images.length === 0 &&
+                      services.find((service) => service.id === editingServiceId)
+                        ?.images?.[0] && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 mb-2">
+                            Current image
+                          </p>
+                          <img
+                            src={
+                              services.find(
+                                (service) => service.id === editingServiceId
+                              ).images[0]
+                            }
+                            alt={newService.title || "Current service"}
+                            className="w-full max-w-xs h-40 object-contain bg-white border border-gray-200 rounded-lg"
+                          />
+                        </div>
+                      )}
                     {newService.images.length > 0 && (
-                      <p className="text-sm text-green-600 mt-2">
-                        {newService.images.length} file(s) selected
-                      </p>
+                      <div className="mt-3 space-y-3">
+                        <p className="text-sm text-green-600">
+                          {newService.images.length} file(s) selected
+                        </p>
+                        {serviceImagePreview && (
+                          <div>
+                            <p className="text-xs text-gray-500 mb-2">
+                              Selected image preview
+                            </p>
+                            <img
+                              src={serviceImagePreview}
+                              alt="Selected service upload preview"
+                              className="w-full max-w-xs h-48 object-contain bg-white border border-gray-200 rounded-lg"
+                            />
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                  >
-                    {loading ? (
-                      <span className="flex items-center justify-center">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Adding Service...
-                      </span>
-                    ) : (
-                      "Add Service"
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                          {editingServiceId
+                            ? "Saving Service..."
+                            : "Adding Service..."}
+                        </span>
+                      ) : editingServiceId ? (
+                        "Save Changes"
+                      ) : (
+                        "Add Service"
+                      )}
+                    </button>
+                    {editingServiceId && (
+                      <button
+                        type="button"
+                        onClick={resetServiceForm}
+                        className="w-full sm:w-auto bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition-colors duration-200 font-medium"
+                      >
+                        Cancel
+                      </button>
                     )}
-                  </button>
+                  </div>
                 </form>
               </div>
 
               {/* Enhanced Services List */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <span className="mr-2">📋</span>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
                   Existing Services ({services.length})
                 </h3>
                 {services.length === 0 ? (
                   <EmptyState
                     message="No services found. Add your first service!"
-                    icon="🛠️"
+                    icon=""
                   />
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1153,7 +1428,7 @@ const AdminDashboard = () => {
                           <img
                             src={service.images[0]}
                             alt={service.title}
-                            className="w-full h-48 object-cover"
+                            className="w-full h-48 object-contain bg-white"
                           />
                         )}
                         <div className="p-4">
@@ -1164,29 +1439,38 @@ const AdminDashboard = () => {
                             {service.description}
                           </p>
                           {service.price && (
-                            <p className="text-blue-600 font-medium mb-4 truncate">
-                              💰 {service.price}
+                            <p className="text-blue-600 font-medium mb-4 truncate text-sm">
+                              Internal reference:{" "}
+                              {service.price}
                             </p>
                           )}
-                          <button
-                            onClick={() => deleteItem("service", service.id)}
-                            className="w-full flex items-center justify-center px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-sm font-medium"
-                          >
-                            <svg
-                              className="w-4 h-4 mr-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => startServiceEdit(service)}
+                              className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 text-sm font-medium"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                            Delete Service
-                          </button>
+                              Edit Service
+                            </button>
+                            <button
+                              onClick={() => deleteItem("service", service.id)}
+                              className="w-full flex items-center justify-center px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 text-sm font-medium"
+                            >
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                              Delete Service
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1201,8 +1485,7 @@ const AdminDashboard = () => {
             <div className="space-y-6">
               {/* Enhanced Add New Portfolio Item Form */}
               <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <span className="mr-2">📁</span>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
                   Add New Portfolio Item
                 </h3>
                 <form onSubmit={handlePortfolioSubmit} className="space-y-4">
@@ -1320,14 +1603,13 @@ const AdminDashboard = () => {
 
               {/* Enhanced Portfolio Items List */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <span className="mr-2">🖼️</span>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
                   Portfolio Items ({portfolio.length})
                 </h3>
                 {portfolio.length === 0 ? (
                   <EmptyState
                     message="No portfolio items found. Add your first project!"
-                    icon="📁"
+                    icon=""
                   />
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1340,7 +1622,7 @@ const AdminDashboard = () => {
                           <img
                             src={item.images[0].image_url}
                             alt={item.title}
-                            className="w-full h-48 object-cover"
+                            className="w-full h-48 object-contain bg-white"
                           />
                         )}
                         <div className="p-4">
@@ -1381,8 +1663,7 @@ const AdminDashboard = () => {
           {activeTab === "settings" && token && !loading && (
             <div className="space-y-6">
               <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <span className="mr-2">⚙️</span>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
                   Site Settings
                 </h3>
                 <form onSubmit={handleSettingsSave} className="space-y-5">
@@ -1467,6 +1748,160 @@ const AdminDashboard = () => {
                     Save Settings
                   </button>
                 </form>
+              </div>
+            </div>
+          )}
+          {activeTab === "team" && token && !loading && (
+            <div className="space-y-6">
+              <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex flex-col gap-2 mb-5">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {editingTeamMemberId ? "Edit Team Member" : "Add Team Member"}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Team members can log in to the admin dashboard and receive new booking email alerts automatically.
+                  </p>
+                </div>
+                <form onSubmit={handleTeamMemberSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="team-name"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Full Name
+                      </label>
+                      <input
+                        id="team-name"
+                        type="text"
+                        value={newTeamMember.username}
+                        onChange={(e) =>
+                          setNewTeamMember({
+                            ...newTeamMember,
+                            username: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter team member name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="team-email"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Email Address
+                      </label>
+                      <input
+                        id="team-email"
+                        type="email"
+                        value={newTeamMember.email}
+                        onChange={(e) =>
+                          setNewTeamMember({
+                            ...newTeamMember,
+                            email: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="name@company.com"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="team-password"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      {editingTeamMemberId ? "New Password" : "Password"}
+                    </label>
+                    <input
+                      id="team-password"
+                      type="password"
+                      value={newTeamMember.password}
+                      onChange={(e) =>
+                        setNewTeamMember({
+                          ...newTeamMember,
+                          password: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder={
+                        editingTeamMemberId
+                          ? "Leave blank to keep current password"
+                          : "Minimum 8 characters"
+                      }
+                      required={!editingTeamMemberId}
+                    />
+                    {editingTeamMemberId ? (
+                      <p className="text-xs text-gray-500 mt-2">
+                        Leave this blank if you only want to update the name or email.
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                    >
+                      {editingTeamMemberId ? "Save Team Member" : "Add Team Member"}
+                    </button>
+                    {editingTeamMemberId ? (
+                      <button
+                        type="button"
+                        onClick={resetTeamMemberForm}
+                        className="w-full sm:w-auto bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                      >
+                        Cancel
+                      </button>
+                    ) : null}
+                  </div>
+                </form>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Team Members ({teamMembers.length})
+                </h3>
+                {teamMembers.length === 0 ? (
+                  <EmptyState message="No team members found yet." icon="" />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {teamMembers.map((member) => (
+                      <div
+                        key={member.id}
+                        className="bg-white p-5 rounded-xl shadow-sm border border-gray-200"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900">
+                              {member.username}
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {member.email}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <button
+                              onClick={() => startTeamMemberEdit(member)}
+                              className="text-blue-600 text-sm font-medium"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteItem("team-member", member.id)}
+                              className="text-red-600 text-sm font-medium"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1679,7 +2114,7 @@ const AdminDashboard = () => {
                 {hardwareCategories.length === 0 ? (
                   <EmptyState
                     message="No hardware categories found yet. Add your first category."
-                    icon="🏪"
+                    icon=""
                   />
                 ) : (
                   hardwareCategories.map((category) => (
@@ -1729,7 +2164,7 @@ const AdminDashboard = () => {
                                 <img
                                   src={item.image_url}
                                   alt={item.name}
-                                  className="w-full h-32 object-cover rounded-lg mb-3"
+                                  className="w-full h-32 object-contain rounded-lg bg-white mb-3"
                                 />
                               ) : null}
                               <div className="flex items-start justify-between gap-3">
@@ -1781,54 +2216,77 @@ const AdminDashboard = () => {
       {/* Enhanced Sidebar */}
       <div
         className={`
-        bg-white w-80 min-h-screen shadow-xl fixed md:relative z-40 transform transition-transform duration-300 ease-in-out
+        order-1 fixed inset-y-0 left-0 z-40 w-80 transform border-r border-slate-200 bg-white text-slate-900 shadow-lg transition-transform duration-300 ease-in-out
         ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }
       `}
       >
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+        <div className="border-b border-slate-200 bg-slate-900 p-6 text-white">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300">
+            Radamjaribu Builders
+          </p>
+          <h1 className="mt-3 text-2xl font-bold">Admin Dashboard</h1>
           {user && (
-            <p className="text-blue-100 mt-2 truncate">
-              Welcome, {user.name || user.email}
-            </p>
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-sm font-semibold text-white">
+                {user.name || "Administrator"}
+              </p>
+              <p className="mt-1 truncate text-xs text-slate-300">{user.email}</p>
+            </div>
           )}
         </div>
         <nav className="p-4">
-          {[
-            { id: "bookings", icon: "📅", label: "Bookings" },
-            { id: "contacts", icon: "📞", label: "Contacts" },
-            { id: "services", icon: "🛠️", label: "Services" },
-            { id: "portfolio", icon: "📁", label: "Portfolio" },
-            { id: "hardware", icon: "🏪", label: "Hardware" },
-            { id: "settings", icon: "⚙️", label: "Settings" },
-          ].map((tab) => (
+          <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+            Navigation
+          </p>
+          {navTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => {
                 setActiveTab(tab.id);
                 setIsSidebarOpen(false);
               }}
-              className={`w-full text-left py-4 px-4 rounded-xl mb-2 flex items-center transition-all duration-200 ${
+              className={`mb-2 flex w-full items-center rounded-2xl px-4 py-4 text-left transition-all duration-200 ${
                 activeTab === tab.id
-                  ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-500"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
-              <span className="text-xl mr-4">{tab.icon}</span>
-              <span className="text-lg">{tab.label}</span>
+              <span
+                className={`mr-4 h-11 w-1 rounded-full ${
+                  activeTab === tab.id
+                    ? `bg-gradient-to-b ${tab.tone}`
+                    : "bg-slate-200"
+                }`}
+              />
+              <div>
+                <span className="block text-base font-semibold">{tab.label}</span>
+                <span
+                  className={`block text-xs ${
+                    activeTab === tab.id ? "text-slate-300" : "text-slate-400"
+                  }`}
+                >
+                  {tab.id === "bookings" && `${bookings.length} requests`}
+                  {tab.id === "contacts" && `${contacts.length} messages`}
+                  {tab.id === "services" && `${services.length} services`}
+                  {tab.id === "portfolio" && `${portfolio.length} projects`}
+                  {tab.id === "hardware" &&
+                    `${hardwareCategories.length} categories`}
+                  {tab.id === "team" && `${teamMembers.length} members`}
+                  {tab.id === "settings" && "Platform controls"}
+                </span>
+              </div>
               {activeTab === tab.id && (
-                <span className="ml-auto w-2 h-2 bg-blue-500 rounded-full"></span>
+                <span className="ml-auto h-2 w-2 rounded-full bg-white"></span>
               )}
             </button>
           ))}
           <button
             onClick={logout}
-            className="w-full text-left py-4 px-4 rounded-xl flex items-center text-red-600 hover:bg-red-50 hover:text-red-700 mt-8 transition-colors duration-200"
+            className="mt-8 flex w-full items-center rounded-2xl px-4 py-4 text-left text-rose-600 transition-colors duration-200 hover:bg-rose-50 hover:text-rose-700"
           >
-            <span className="text-xl mr-4">🚪</span>
-            <span className="text-lg">Logout</span>
+            <span className="text-lg font-semibold">Logout</span>
           </button>
         </nav>
       </div>
