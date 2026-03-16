@@ -118,10 +118,10 @@ const ServicesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-12">
+      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-12 text-white sm:py-14">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl font-bold mb-4">Our Services</h1>
-          <p className="text-lg">
+          <h1 className="mb-4 text-3xl font-bold sm:text-4xl">Our Services</h1>
+          <p className="text-base sm:text-lg">
             Professional construction services with expertise in delivering
             quality projects
           </p>
@@ -157,14 +157,14 @@ const ServicesPage = () => {
               <p className="text-gray-500">Check back later for our service offerings.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {services.map((service) => (
                 <div
                   key={service.id}
                   className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
                 >
                   {/* Image Container with Error Handling */}
-                  <div className="relative h-64 bg-gray-100">
+                  <div className="relative h-56 bg-gray-100 sm:h-64">
                     {service.image_url ? (
                       <>
                         <img
@@ -193,7 +193,7 @@ const ServicesPage = () => {
                   </div>
                   
                   <div className="p-5">
-                    <h3 className="text-xl font-semibold mb-3 text-gray-800">
+                    <h3 className="mb-3 text-lg font-semibold text-gray-800 sm:text-xl">
                       {service.name}
                     </h3>
                     <p className="text-gray-600 mb-5 text-sm leading-7 min-h-[5.25rem]">
@@ -215,11 +215,11 @@ const ServicesPage = () => {
 
       {/* Booking Modal */}
       {showBookingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-3 sm:p-4">
+          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white shadow-lg">
+            <div className="p-5 sm:p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Book Consultation</h2>
+                <h2 className="text-lg font-bold text-gray-800 sm:text-xl">Book Consultation</h2>
                 <button
                   onClick={() => setShowBookingModal(false)}
                   className="text-gray-500 hover:text-gray-700"

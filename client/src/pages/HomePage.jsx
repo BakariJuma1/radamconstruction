@@ -75,17 +75,17 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-slate-900">
-      <section className="overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(254,240,138,0.35),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#1d4ed8_48%,#0f766e_100%)] py-14 text-white md:py-20 lg:py-28">
-        <div className="container mx-auto grid gap-12 px-4 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <section className="overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(254,240,138,0.35),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#1d4ed8_48%,#0f766e_100%)] py-12 text-white sm:py-14 md:py-20 lg:py-24">
+        <div className="container mx-auto grid gap-8 px-4 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200 sm:text-sm sm:tracking-[0.35em]">
               Build with confidence
             </p>
-            <h1 className="mt-4 max-w-3xl text-3xl font-bold leading-tight sm:text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="mt-4 max-w-3xl text-[1.85rem] font-bold leading-tight sm:text-4xl md:text-5xl lg:text-[3.7rem]">
               Professional construction services and reliable hardware supply
               for every stage of your project
             </h1>
-            <p className="mt-5 max-w-2xl text-base text-slate-200 sm:text-lg">
+            <p className="mt-4 max-w-2xl text-[0.95rem] text-slate-200 sm:mt-5 sm:text-lg">
               From new builds and renovations to plumbing works and material
               sourcing, Radamjaribu Builders helps clients move from idea to
               site execution with clear quotations and dependable delivery.
@@ -115,12 +115,14 @@ export default function HomePage() {
           <div className="grid gap-4">
             <div className="rounded-[2rem] bg-white/10 p-4 backdrop-blur">
               {heroVisuals.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {heroVisuals.map((item, index) => (
                     <article
                       key={item.id}
-                    className={`group overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/20 ${
-                        index === 0 ? "col-span-2 h-48 sm:h-56" : "h-32 sm:h-40"
+                      className={`group overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/20 ${
+                        index === 0
+                          ? "h-52 sm:col-span-2 sm:h-56"
+                          : "h-40 sm:h-40"
                       }`}
                     >
                       <div className="relative h-full">
@@ -143,22 +145,22 @@ export default function HomePage() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="rounded-2xl bg-white/10 p-4">
-                    <div className="text-3xl font-bold">60+</div>
-                    <div className="mt-1 text-sm text-slate-200">Projects completed</div>
+                    <div className="text-xl font-bold sm:text-3xl">60+</div>
+                    <div className="mt-1 text-xs text-slate-200 sm:text-sm">Projects completed</div>
                   </div>
                   <div className="rounded-2xl bg-white/10 p-4">
-                    <div className="text-3xl font-bold">10+</div>
-                    <div className="mt-1 text-sm text-slate-200">Years experience</div>
+                    <div className="text-xl font-bold sm:text-3xl">10+</div>
+                    <div className="mt-1 text-xs text-slate-200 sm:text-sm">Years experience</div>
                   </div>
                   <div className="rounded-2xl bg-white/10 p-4">
-                    <div className="text-3xl font-bold">Reliable</div>
-                    <div className="mt-1 text-sm text-slate-200">Construction delivery</div>
+                    <div className="text-xl font-bold sm:text-3xl">Reliable</div>
+                    <div className="mt-1 text-xs text-slate-200 sm:text-sm">Construction delivery</div>
                   </div>
                   <div className="rounded-2xl bg-white/10 p-4">
-                    <div className="text-3xl font-bold">Fast</div>
-                    <div className="mt-1 text-sm text-slate-200">Hardware response</div>
+                    <div className="text-xl font-bold sm:text-3xl">Fast</div>
+                    <div className="mt-1 text-xs text-slate-200 sm:text-sm">Hardware response</div>
                   </div>
                 </div>
               )}
@@ -166,20 +168,20 @@ export default function HomePage() {
             <div className="rounded-3xl bg-white/10 p-4 backdrop-blur sm:p-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-2xl bg-white/10 p-4">
-                  <div className="text-2xl font-bold sm:text-3xl">60+</div>
-                  <div className="mt-1 text-sm text-slate-200">Projects completed</div>
+                  <div className="text-xl font-bold sm:text-3xl">60+</div>
+                  <div className="mt-1 text-xs text-slate-200 sm:text-sm">Projects completed</div>
                 </div>
                 <div className="rounded-2xl bg-white/10 p-4">
-                  <div className="text-2xl font-bold sm:text-3xl">10+</div>
-                  <div className="mt-1 text-sm text-slate-200">Years experience</div>
+                  <div className="text-xl font-bold sm:text-3xl">10+</div>
+                  <div className="mt-1 text-xs text-slate-200 sm:text-sm">Years experience</div>
                 </div>
                 <div className="rounded-2xl bg-white/10 p-4">
-                  <div className="text-2xl font-bold sm:text-3xl">Build</div>
-                  <div className="mt-1 text-sm text-slate-200">Construction and renovation</div>
+                  <div className="text-xl font-bold sm:text-3xl">Build</div>
+                  <div className="mt-1 text-xs text-slate-200 sm:text-sm">Construction and renovation</div>
                 </div>
                 <div className="rounded-2xl bg-white/10 p-4">
-                  <div className="text-2xl font-bold sm:text-3xl">Supply</div>
-                  <div className="mt-1 text-sm text-slate-200">Materials and hardware RFQ</div>
+                  <div className="text-xl font-bold sm:text-3xl">Supply</div>
+                  <div className="mt-1 text-xs text-slate-200 sm:text-sm">Materials and hardware RFQ</div>
                 </div>
               </div>
             </div>
@@ -215,7 +217,7 @@ export default function HomePage() {
 
       <section className="bg-white py-12">
         <div className="container mx-auto px-4 md:px-8">
-          <p className="text-center text-sm font-semibold uppercase tracking-[0.35em] text-slate-500">
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 sm:text-sm sm:tracking-[0.35em]">
             Trusted suppliers and brands
           </p>
           <div className="mt-8 grid grid-cols-2 gap-4 text-center text-sm font-semibold text-slate-600 md:grid-cols-4 lg:grid-cols-7">

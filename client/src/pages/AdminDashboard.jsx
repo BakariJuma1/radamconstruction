@@ -960,12 +960,12 @@ const AdminDashboard = () => {
   });
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row overflow-x-hidden">
       {/* Main Content */}
       <div className="order-2 flex-1 md:ml-0 min-w-0 pb-20 md:pb-0 md:pl-80">
         {/* Sticky Header */}
         <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-          <div className="px-4 sm:px-6 py-4 flex justify-between items-center">
+          <div className="px-4 py-4 sm:px-6 flex justify-between items-center gap-3">
             {/* Hamburger menu button for mobile, now inside header */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -986,7 +986,7 @@ const AdminDashboard = () => {
                 />
               </svg>
             </button>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
                 Control Center
               </p>
@@ -994,7 +994,7 @@ const AdminDashboard = () => {
                 {activeTabMeta.label}
               </h2>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="hidden md:flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
                 <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
                   {user?.name?.[0] || user?.email?.[0] || "A"}
@@ -1015,7 +1015,7 @@ const AdminDashboard = () => {
           </div>
         </header>
 
-        <main className="p-4 sm:p-6 overflow-x-hidden">
+        <main className="p-3 sm:p-4 lg:p-6 overflow-x-hidden">
           <section className="mb-6 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-200 px-6 py-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

@@ -13,18 +13,8 @@ const navItems = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { user, logout } = useContext(AuthContext);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 12);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     setIsOpen(false);
@@ -39,7 +29,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="fixed inset-x-0 top-0 z-40">
       <div className="bg-slate-950 text-slate-200">
         <div className="container mx-auto hidden items-center justify-between px-4 py-2 text-[11px] font-medium tracking-[0.18em] lg:flex md:px-8 uppercase">
           <p className="truncate">Construction, plumbing, finishing, and hardware supply</p>
@@ -47,13 +37,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div
-        className={`border-b border-slate-200 transition-all duration-300 ${
-          isScrolled
-            ? "bg-white/96 shadow-lg backdrop-blur-md"
-            : "bg-stone-50/95 backdrop-blur-sm"
-        }`}
-      >
+      <div className="border-b border-slate-200 bg-stone-50">
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between gap-3 py-3 lg:gap-6 lg:py-4">
             <Link to="/" className="min-w-0 flex-1 lg:flex-none">
@@ -83,7 +67,7 @@ const Navbar = () => {
                   <Link
                     key={item.href}
                     to={item.href}
-                    className={`rounded-full px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors duration-200 xl:px-4 xl:text-sm xl:tracking-[0.18em] ${
+                    className={`rounded-full px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] xl:px-4 xl:text-sm xl:tracking-[0.18em] ${
                       active
                         ? "bg-slate-900 text-white"
                         : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
@@ -98,13 +82,13 @@ const Navbar = () => {
             <div className="hidden items-center gap-2 lg:flex xl:gap-3">
               <Link
                 to="/hardware"
-                className="hidden rounded-full border border-slate-300 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-900 hover:text-slate-900 xl:inline-flex xl:px-4 xl:text-sm xl:tracking-[0.16em]"
+                className="hidden rounded-full border border-slate-300 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 hover:border-slate-900 hover:text-slate-900 xl:inline-flex xl:px-4 xl:text-sm xl:tracking-[0.16em]"
               >
                 Hardware Supplies
               </Link>
               <Link
                 to="/booking"
-                className="rounded-full bg-amber-600 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white transition hover:bg-amber-700 xl:px-5 xl:py-3 xl:text-sm xl:tracking-[0.18em]"
+                className="rounded-full bg-amber-600 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white hover:bg-amber-700 xl:px-5 xl:py-3 xl:text-sm xl:tracking-[0.18em]"
               >
                 Request Quote
               </Link>
@@ -112,13 +96,13 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/admin/dashboard"
-                    className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 transition hover:text-slate-900 xl:text-sm xl:tracking-[0.14em]"
+                    className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 hover:text-slate-900 xl:text-sm xl:tracking-[0.14em]"
                   >
                     Dashboard
                   </Link>
                   <button
                     onClick={logout}
-                    className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 transition hover:text-rose-600 xl:text-sm xl:tracking-[0.14em]"
+                    className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 hover:text-rose-600 xl:text-sm xl:tracking-[0.14em]"
                   >
                     Logout
                   </button>
@@ -126,7 +110,7 @@ const Navbar = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 transition hover:text-slate-900 xl:text-sm xl:tracking-[0.14em]"
+                  className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-700 hover:text-slate-900 xl:text-sm xl:tracking-[0.14em]"
                 >
                   Login
                 </Link>
@@ -142,7 +126,7 @@ const Navbar = () => {
               </Link>
               <button
                 onClick={() => setIsOpen((current) => !current)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900 transition hover:border-slate-900 sm:h-12 sm:w-12"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900 hover:border-slate-900 sm:h-12 sm:w-12"
                 aria-label="Toggle navigation menu"
               >
                 {isOpen ? <X size={22} /> : <Menu size={22} />}
@@ -152,9 +136,7 @@ const Navbar = () => {
         </div>
 
         <div
-          className={`overflow-hidden border-t border-slate-200 bg-white transition-all duration-300 lg:hidden ${
-            isOpen ? "max-h-[520px]" : "max-h-0"
-          }`}
+          className={`${isOpen ? "block" : "hidden"} border-t border-slate-200 bg-white lg:hidden`}
         >
           <div className="container mx-auto px-4 py-5 md:px-8">
             <div className="rounded-3xl border border-slate-200 bg-stone-50 p-5">
@@ -174,7 +156,7 @@ const Navbar = () => {
                     <Link
                       key={item.href}
                       to={item.href}
-                      className={`rounded-2xl px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition-colors ${
+                      className={`rounded-2xl px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] ${
                         active
                           ? "bg-slate-900 text-white"
                           : "bg-white text-slate-700 hover:bg-slate-100"

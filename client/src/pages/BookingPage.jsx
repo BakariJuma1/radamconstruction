@@ -117,16 +117,16 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-stone-50">
-      <section className="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 py-16 text-white">
+      <section className="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 py-12 text-white sm:py-14 md:py-16">
         <div className="container mx-auto px-4 md:px-8">
           <div className="max-w-3xl">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-blue-200">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-blue-200 sm:text-sm sm:tracking-[0.3em]">
               Booking and Quotation
             </p>
-            <h1 className="text-4xl font-bold md:text-5xl">
+            <h1 className="text-3xl font-bold sm:text-4xl md:text-5xl">
               Request a site visit, quotation, or materials-assisted project plan
             </h1>
-            <p className="mt-5 max-w-2xl text-lg text-blue-100">
+            <p className="mt-5 max-w-2xl text-base text-blue-100 sm:text-lg">
               Give the team enough detail once, and let them respond with a
               practical next step instead of forcing you through several calls.
             </p>
@@ -135,7 +135,7 @@ export default function BookingPage() {
       </section>
 
       <section className="container mx-auto grid gap-8 px-4 py-12 md:px-8 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-3xl bg-white p-6 shadow-lg md:p-8">
+        <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-6 md:p-8">
           <div className="mb-8">
             <h2 className="text-2xl font-semibold text-slate-900">
               Project intake form
@@ -305,8 +305,8 @@ export default function BookingPage() {
         </div>
 
         <aside className="space-y-6">
-          <div className="rounded-3xl bg-slate-900 p-6 text-white shadow-lg">
-            <h2 className="text-2xl font-semibold">Need a faster response?</h2>
+          <div className="rounded-3xl bg-slate-900 p-5 text-white shadow-lg sm:p-6">
+            <h2 className="text-xl font-semibold sm:text-2xl">Need a faster response?</h2>
             <p className="mt-3 text-sm text-slate-300">
               Use WhatsApp for instant follow-up on quotations, site visits, or
               hardware availability.
@@ -332,8 +332,8 @@ export default function BookingPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-lg">
-            <h3 className="text-xl font-semibold text-slate-900">
+          <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-6">
+            <h3 className="text-lg font-semibold text-slate-900 sm:text-xl">
               What improves your quotation speed
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-slate-600">
@@ -344,7 +344,7 @@ export default function BookingPage() {
             </ul>
           </div>
 
-          <div className="rounded-3xl border border-dashed border-slate-300 p-6">
+          <div className="rounded-3xl border border-dashed border-slate-300 p-5 sm:p-6">
             <h3 className="text-lg font-semibold text-slate-900">
               Service loading status
             </h3>
