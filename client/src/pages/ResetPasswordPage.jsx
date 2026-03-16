@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 
 export default function ResetPasswordPage() {
@@ -119,9 +119,9 @@ export default function ResetPasswordPage() {
           </button>
         </form>
 
-        <a href="/login" className="mt-5 block text-center text-sm font-medium text-blue-600">
+        <Link to="/login" className="mt-5 block text-center text-sm font-medium text-blue-600">
           Back to login
-        </a>
+        </Link>
       </div>
     </div>
   );

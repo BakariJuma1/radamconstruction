@@ -7,6 +7,7 @@ const PortfolioPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedProject, setSelectedProject] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [cardImageIndexes, setCardImageIndexes] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -29,6 +30,12 @@ const PortfolioPage = () => {
         }));
         
         setPortfolioItems(transformedData);
+        setCardImageIndexes(
+          transformedData.reduce((accumulator, item) => {
+            accumulator[item.id] = 0;
+            return accumulator;
+          }, {})
+        );
         setLoading(false);
       })
       .catch((error) => {
@@ -72,6 +79,22 @@ const PortfolioPage = () => {
         (prevIndex - 1 + selectedProject.allImages.length) % selectedProject.allImages.length
       );
     }
+  };
+
+  const nextCardImage = (event, projectId, imageCount) => {
+    event.stopPropagation();
+    setCardImageIndexes((current) => ({
+      ...current,
+      [projectId]: ((current[projectId] || 0) + 1) % imageCount,
+    }));
+  };
+
+  const prevCardImage = (event, projectId, imageCount) => {
+    event.stopPropagation();
+    setCardImageIndexes((current) => ({
+      ...current,
+      [projectId]: ((current[projectId] || 0) - 1 + imageCount) % imageCount,
+    }));
   };
 
   // Handle keyboard navigation
@@ -182,7 +205,7 @@ const PortfolioPage = () => {
                     {project.allImages && project.allImages.length > 0 ? (
                       <>
                         <ImageWithFallback
-                          src={project.allImages[0]}
+                          src={project.allImages[cardImageIndexes[project.id] || 0]}
                           alt={project.title}
                           className="w-full h-full object-cover"
                         />
@@ -193,6 +216,52 @@ const PortfolioPage = () => {
                             </svg>
                             {project.allImages.length}
                           </div>
+                        )}
+                        {project.allImages.length > 1 && (
+                          <>
+                            <button
+                              onClick={(event) =>
+                                prevCardImage(event, project.id, project.allImages.length)
+                              }
+                              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75"
+                              aria-label={`Previous image for ${project.title}`}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={(event) =>
+                                nextCardImage(event, project.id, project.allImages.length)
+                              }
+                              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white transition hover:bg-black/75"
+                              aria-label={`Next image for ${project.title}`}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1">
+                              {project.allImages.map((_, index) => (
+                                <button
+                                  key={index}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    setCardImageIndexes((current) => ({
+                                      ...current,
+                                      [project.id]: index,
+                                    }));
+                                  }}
+                                  className={`h-2 w-2 rounded-full ${
+                                    index === (cardImageIndexes[project.id] || 0)
+                                      ? "bg-white"
+                                      : "bg-white/50"
+                                  }`}
+                                  aria-label={`Show image ${index + 1} for ${project.title}`}
+                                />
+                              ))}
+                            </div>
+                          </>
                         )}
                       </>
                     ) : (

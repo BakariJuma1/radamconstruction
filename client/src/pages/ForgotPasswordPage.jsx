@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
 
@@ -76,9 +77,9 @@ export default function ForgotPasswordPage() {
           </button>
         </form>
 
-        <a href="/login" className="mt-5 block text-center text-sm font-medium text-blue-600">
+        <Link to="/login" className="mt-5 block text-center text-sm font-medium text-blue-600">
           Back to login
-        </a>
+        </Link>
       </div>
     </div>
   );

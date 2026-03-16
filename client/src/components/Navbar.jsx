@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Menu, X, User, LogOut, Quote, Store } from "lucide-react";
 import { AuthContext } from "../AuthContext";
 
@@ -25,8 +26,8 @@ const Navbar = () => {
   ];
 
   const NavLink = ({ href, children, isActive = false, mobile = false }) => (
-    <a
-      href={href}
+    <Link
+      to={href}
       className={`
         relative transition-all duration-300 font-medium group
         ${mobile ? 
@@ -40,7 +41,7 @@ const Navbar = () => {
       {!mobile && (
         <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-4/5 group-hover:left-[10%]" />
       )}
-    </a>
+    </Link>
   );
 
   return (
@@ -53,14 +54,14 @@ const Navbar = () => {
     `}>
       <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
         {/* Logo */}
-        <a href="/" className="flex items-center group">
+        <Link to="/" className="flex items-center group">
           <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white font-bold text-xl p-2 mr-3 rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-105">
             R
           </div>
           <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
             adamjaribu Builders
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center space-x-1">
@@ -72,22 +73,22 @@ const Navbar = () => {
           
           {/* User Section */}
           <div className="flex items-center space-x-4 ml-4 pl-4 border-l border-gray-200">
-            <a
-              href="/hardware"
+            <Link
+              to="/hardware"
               className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
             >
               <Store size={18} />
               <span>Store RFQ</span>
-            </a>
+            </Link>
             {user ? (
               <div className="flex items-center space-x-3">
-                <a 
-                  href="/admin/dashboard"
+                <Link 
+                  to="/admin/dashboard"
                   className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
                 >
                   <User size={18} />
                   <span>Dashboard</span>
-                </a>
+                </Link>
                 <button
                   onClick={logout}
                   className="flex items-center space-x-2 text-gray-700 hover:text-red-600 transition-colors duration-200"
@@ -97,34 +98,34 @@ const Navbar = () => {
                 </button>
               </div>
             ) : (
-              <a 
-                href="/login"
+              <Link 
+                to="/login"
                 className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
               >
                 Login
-              </a>
+              </Link>
             )}
             
             {/* CTA Button */}
-            <a
-              href="/booking"
+            <Link
+              to="/booking"
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center space-x-2"
             >
               <Quote size={18} />
               <span>Get Quote</span>
-            </a>
+            </Link>
           </div>
         </nav>
 
         {/* Mobile Menu Button */}
         <div className="lg:hidden flex items-center space-x-3">
           {user && (
-            <a 
-              href="/admin/dashboard"
+            <Link 
+              to="/admin/dashboard"
               className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
             >
               <User size={20} />
-            </a>
+            </Link>
           )}
           <button 
             onClick={() => setIsOpen(!isOpen)}
@@ -152,13 +153,13 @@ const Navbar = () => {
           <div className="pt-4 mt-4 border-t border-gray-200 space-y-3">
             {user ? (
               <>
-                <a
-                  href="/admin/dashboard"
+                <Link
+                  to="/admin/dashboard"
                   className="flex items-center space-x-3 py-3 px-4 rounded-lg hover:bg-blue-50 text-gray-700"
                 >
                   <User size={18} />
                   <span>Dashboard</span>
-                </a>
+                </Link>
                 <button
                   onClick={() => {
                     logout();
@@ -171,21 +172,21 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <a
-                href="/login"
+              <Link
+                to="/login"
                 className="block py-3 px-4 rounded-lg hover:bg-blue-50 text-gray-700 font-medium"
               >
                 Login
-              </a>
+              </Link>
             )}
             
-            <a
-              href="/booking"
+            <Link
+              to="/booking"
               className="flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-4 rounded-lg mt-2 shadow-lg"
             >
               <Quote size={18} />
               <span>Get Free Quote</span>
-            </a>
+            </Link>
           </div>
         </nav>
       </div>

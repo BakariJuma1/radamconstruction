@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import WhatsAppButton from "../components/WhatsAppButton";
 import { API_BASE_URL } from "../config";
@@ -90,18 +91,18 @@ export default function HomePage() {
               site execution with clear quotations and dependable delivery.
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <a
-                href="/booking"
+              <Link
+                to="/booking"
                 className="inline-flex items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-slate-900 transition hover:bg-amber-200"
               >
                 Request a free quote
-              </a>
-              <a
-                href="/hardware"
+              </Link>
+              <Link
+                to="/hardware"
                 className="inline-flex items-center justify-center rounded-xl border border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
               >
                 Browse hardware supplies
-              </a>
+              </Link>
             </div>
             <div className="mt-4">
               <WhatsAppButton
@@ -243,9 +244,9 @@ export default function HomePage() {
             </p>
             <h2 className="mt-2 text-3xl font-bold">Professional service lines</h2>
           </div>
-          <a href="/services" className="font-semibold text-blue-700">
+          <Link to="/services" className="font-semibold text-blue-700">
             View all services
-          </a>
+          </Link>
         </div>
         {isLoadingServices ? (
           <div className="rounded-3xl bg-white p-8 shadow-lg">Loading services...</div>
@@ -275,9 +276,9 @@ export default function HomePage() {
                     {service.description}
                   </p>
                   <div className="mt-5 flex items-center justify-between gap-3">
-                    <a href="/booking" className="font-semibold text-blue-700">
+                    <Link to="/booking" className="font-semibold text-blue-700">
                       Request quote
-                    </a>
+                    </Link>
                     <WhatsAppButton
                       label="WhatsApp"
                       message={`Hello Radamjaribu Builders, I want a quote for ${service.name}.`}
@@ -302,9 +303,9 @@ export default function HomePage() {
                 See the standard of work before you request a quotation
               </h2>
             </div>
-            <a href="/portfolio" className="font-semibold text-amber-300">
+            <Link to="/portfolio" className="font-semibold text-amber-300">
               View portfolio
-            </a>
+            </Link>
           </div>
           <div className="grid gap-6 lg:grid-cols-3">
             {caseStudyItems.map((item) => (
@@ -431,12 +432,12 @@ export default function HomePage() {
                 your list for pricing, availability, and delivery options.
               </p>
             </div>
-            <a
-              href="/hardware"
+            <Link
+              to="/hardware"
               className="inline-flex items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-slate-900 transition hover:bg-amber-200"
             >
               View hardware supplies
-            </a>
+            </Link>
           </div>
         </div>
       </section>

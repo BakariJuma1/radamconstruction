@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import ServicesPage from "./pages/ServicesPage";
 import PortfolioPage from "./pages/PortfolioPage.jsx";
@@ -15,6 +15,9 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <>
       <Navbar />
@@ -31,7 +34,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
       <WhatsAppButton floating />
-      <Footer />
+      {isAdminRoute ? null : <Footer />}
     </>
   );
 }

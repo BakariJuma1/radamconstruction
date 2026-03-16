@@ -33,15 +33,29 @@ export default function HardwarePage() {
       .finally(() => setLoadingCatalog(false));
   }, []);
 
-  const displayCategories =
-    catalogCategories.length > 0
-      ? catalogCategories.map((category) => ({
-          id: category.id,
-          title: category.name,
-          description: category.description,
-          items: category.items || [],
-        }))
-      : hardwareCategories;
+  const apiCategories = catalogCategories.map((category) => ({
+    id: `api-${category.id}`,
+    title: category.name,
+    description: category.description,
+    items: category.items || [],
+  }));
+
+  const defaultCategories = hardwareCategories.map((category) => ({
+    ...category,
+    id: `default-${category.id}`,
+  }));
+
+  const mergedCategories = [
+    ...defaultCategories,
+    ...apiCategories.filter(
+      (apiCategory) =>
+        !defaultCategories.some(
+          (defaultCategory) =>
+            defaultCategory.title.trim().toLowerCase() ===
+            apiCategory.title.trim().toLowerCase()
+        )
+    ),
+  ];
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -84,7 +98,7 @@ export default function HardwarePage() {
 
       <section className="container mx-auto grid gap-8 px-4 py-12 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="grid gap-6 md:grid-cols-2">
-          {displayCategories.map((category) => (
+          {mergedCategories.map((category) => (
             <article key={category.id} className="rounded-3xl bg-white p-6 shadow-lg">
               <h2 className="text-2xl font-semibold text-slate-900">
                 {category.title}
@@ -107,7 +121,7 @@ export default function HardwarePage() {
                             <img
                               src={item.image_url}
                               alt={item.name}
-                              className="h-16 w-16 rounded-lg object-cover flex-shrink-0"
+                              className="h-16 w-16 rounded-lg object-contain bg-white flex-shrink-0"
                             />
                           ) : null}
                           <div>
@@ -149,8 +163,8 @@ export default function HardwarePage() {
               {loadingCatalog
                 ? "Loading hardware catalog..."
                 : catalogCategories.length > 0
-                ? "Showing admin-managed hardware items."
-                : "Showing fallback catalog because no hardware items have been added yet."}
+                ? "Showing built-in hardware categories together with admin-added categories."
+                : "Showing built-in hardware categories."}
             </p>
 
             {status ? (
@@ -215,7 +229,8 @@ export default function HardwarePage() {
               <WhatsAppButton
                 label="Order via WhatsApp"
                 message="Hello Radamjaribu Builders, I want to request pricing and availability for hardware materials."
-                className="justify-center bg-white text-emerald-700 hover:bg-emerald-50"
+                className="justify-center"
+                light
               />
             </div>
           </div>

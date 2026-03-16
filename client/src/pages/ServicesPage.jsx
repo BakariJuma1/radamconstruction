@@ -157,14 +157,14 @@ const ServicesPage = () => {
               <p className="text-gray-500">Check back later for our service offerings.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service) => (
                 <div
                   key={service.id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
+                  className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
                 >
                   {/* Image Container with Error Handling */}
-                  <div className="relative h-48 bg-gray-100">
+                  <div className="relative h-64 bg-gray-100">
                     {service.image_url ? (
                       <>
                         <img
@@ -192,21 +192,16 @@ const ServicesPage = () => {
                     )}
                   </div>
                   
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold mb-2 text-gray-800">
+                  <div className="p-5">
+                    <h3 className="text-xl font-semibold mb-3 text-gray-800">
                       {service.name}
                     </h3>
-                    <p className="text-gray-600 mb-3 text-sm">
+                    <p className="text-gray-600 mb-5 text-sm leading-7 min-h-[5.25rem]">
                       {service.description}
                     </p>
-                    {service.price && (
-                      <div className="text-md font-semibold text-blue-600 mb-3">
-                        Starting from KES {service.price.toLocaleString()}
-                      </div>
-                    )}
                     <button
                       onClick={() => handleBookClick(service)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                     >
                       Book Consultation
                     </button>
@@ -252,11 +247,9 @@ const ServicesPage = () => {
                   {selectedService && (
                     <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-100">
                       <h3 className="font-semibold text-blue-800">Service: {selectedService.name}</h3>
-                      {selectedService.price && (
-                        <p className="text-blue-600">
-                          KES {selectedService.price.toLocaleString()}
-                        </p>
-                      )}
+                      <p className="text-blue-600 text-sm mt-1">
+                        Final pricing depends on project scope, site conditions, and material requirements.
+                      </p>
                     </div>
                   )}
 
