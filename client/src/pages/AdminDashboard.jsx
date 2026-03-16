@@ -2517,7 +2517,7 @@ const AdminDashboard = () => {
       {/* Enhanced Sidebar */}
       <div
         className={`
-        order-1 fixed inset-x-0 top-[76px] bottom-0 left-0 z-30 w-full transform border-r border-slate-200 bg-white text-slate-900 shadow-lg transition-transform duration-300 ease-in-out md:inset-x-auto md:top-[112px] md:w-80
+        order-1 fixed inset-x-0 top-[76px] bottom-0 left-0 z-40 w-full transform border-r border-slate-200 bg-white text-slate-900 shadow-lg transition-transform duration-300 ease-in-out md:inset-x-auto md:top-[112px] md:w-80
         ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }
@@ -2610,7 +2610,7 @@ const AdminDashboard = () => {
       {/* Overlay for mobile when sidebar is open */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}

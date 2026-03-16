@@ -117,16 +117,16 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-stone-50">
-      <section className="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 py-12 text-white sm:py-14 md:py-16">
+      <section className="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 py-10 text-white sm:py-14 md:py-16">
         <div className="container mx-auto px-4 md:px-8">
           <div className="max-w-3xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-blue-200 sm:text-sm sm:tracking-[0.3em]">
               Booking and Quotation
             </p>
-            <h1 className="text-3xl font-bold sm:text-4xl md:text-5xl">
+            <h1 className="text-[1.9rem] font-bold leading-tight sm:text-4xl md:text-5xl">
               Request a site visit, quotation, or materials-assisted project plan
             </h1>
-            <p className="mt-5 max-w-2xl text-base text-blue-100 sm:text-lg">
+            <p className="mt-4 max-w-2xl text-[0.95rem] text-blue-100 sm:mt-5 sm:text-lg">
               Give the team enough detail once, and let them respond with a
               practical next step instead of forcing you through several calls.
             </p>
@@ -134,13 +134,13 @@ export default function BookingPage() {
         </div>
       </section>
 
-      <section className="container mx-auto grid gap-8 px-4 py-12 md:px-8 lg:grid-cols-[1.2fr_0.8fr]">
+      <section className="container mx-auto grid gap-6 px-4 py-8 md:px-8 md:py-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8">
         <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-6 md:p-8">
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-slate-900">
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-xl font-semibold text-slate-900 sm:text-2xl">
               Project intake form
             </h2>
-            <p className="mt-2 text-slate-600">
+            <p className="mt-2 text-sm text-slate-600 sm:text-base">
               This sends a structured quote request to the admin dashboard.
             </p>
           </div>
@@ -157,8 +157,8 @@ export default function BookingPage() {
             </div>
           ) : null}
 
-          <form onSubmit={handleSubmit} className="grid gap-5">
-            <div className="grid gap-5 md:grid-cols-2">
+          <form onSubmit={handleSubmit} className="grid gap-4 sm:gap-5">
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-slate-700">Full name</span>
                 <input
@@ -181,7 +181,7 @@ export default function BookingPage() {
               </label>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-slate-700">Email</span>
                 <input
@@ -211,7 +211,7 @@ export default function BookingPage() {
               </label>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-3">
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-slate-700">Project type</span>
                 <select
@@ -253,7 +253,7 @@ export default function BookingPage() {
               </label>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-slate-700">Project location</span>
                 <input
