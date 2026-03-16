@@ -8,6 +8,8 @@ import LoginPage from "./pages/LoginPage.jsx";
 import Footer from "./components/Footer.jsx";
 import Contact from "./pages/Contact.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import HardwarePage from "./pages/HardwarePage.jsx";
+import WhatsAppButton from "./components/WhatsAppButton.jsx";
 
 
 function App() {
@@ -19,12 +21,13 @@ function App() {
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/booking" element={<BookingPage />} />
+        <Route path="/hardware" element={<HardwarePage />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
-      <Footer/>
-
+      <WhatsAppButton floating />
+      <Footer />
     </>
   );
 }

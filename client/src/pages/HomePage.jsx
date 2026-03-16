@@ -1,672 +1,419 @@
-import React, { useState, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import WhatsAppButton from "../components/WhatsAppButton";
+import { API_BASE_URL } from "../config";
+import { caseStudyItems, testimonialItems } from "../data/siteContent";
+import { SiteSettingsContext } from "../SiteSettingsContext";
 
-const HomePage = () => {
+export default function HomePage() {
+  const { settings } = useContext(SiteSettingsContext);
   const [services, setServices] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
-  const [loadingServices, setLoadingServices] = useState(true);
-  const [loadingPortfolio, setLoadingPortfolio] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState({});
-  const [activeFaqIndex, setActiveFaqIndex] = useState(null);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
+  const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(true);
+
+  const reviewsToShow =
+    settings?.google_reviews?.length > 0
+      ? settings.google_reviews.slice(0, 3).map((review, index) => ({
+          id: review.id || `google-${index}`,
+          name: review.author_name || review.name || "Google reviewer",
+          location: settings.google_business_name || "Google Review",
+          project: review.relative_time_description || "Verified review",
+          result: review.rating
+            ? `${review.rating}/5 rating on Google`
+            : "Google review",
+          quote: review.text || review.comment || "",
+        }))
+      : testimonialItems;
+
+  const serviceVisuals = services
+    .filter((service) => service.image_url)
+    .slice(0, 2)
+    .map((service) => ({
+      id: `service-${service.id}`,
+      image: service.image_url,
+      title: service.name,
+      tag: "Service",
+    }));
+
+  const portfolioVisuals = portfolio
+    .map((project) => ({
+      id: `portfolio-${project.id}`,
+      image: project.image_url || project.images?.[0]?.image_url,
+      title: project.title || project.tittle,
+      tag: "Project",
+    }))
+    .filter((project) => project.image)
+    .slice(0, 2);
+
+  const heroVisuals = [...portfolioVisuals, ...serviceVisuals].slice(0, 4);
 
   useEffect(() => {
-    // Fetch services data
     axios
-      .get("https://radamconstruction.onrender.com/services")
+      .get(`${API_BASE_URL}/services`)
       .then((response) => {
         const data = Array.isArray(response.data)
           ? response.data
           : response.data.services || [];
         setServices(data.slice(0, 3));
-        setLoadingServices(false);
       })
-      .catch((error) => {
-        console.error("Error fetching services:", error);
-        setLoadingServices(false);
-      });
+      .catch((error) => console.error("Failed to fetch services", error))
+      .finally(() => setIsLoadingServices(false));
 
-    // Fetch portfolio data
     axios
-      .get("https://radamconstruction.onrender.com/portfolio")
+      .get(`${API_BASE_URL}/portfolio`)
       .then((response) => {
         const data = Array.isArray(response.data)
           ? response.data
           : response.data.portfolio || [];
-        const portfolioData = data.slice(0, 3);
-        setPortfolio(portfolioData);
-
-        // Initialize current image index for each portfolio item
-        const initialIndexes = {};
-        portfolioData.forEach((item, index) => {
-          initialIndexes[index] = 0;
-        });
-        setCurrentImageIndex(initialIndexes);
-
-        setLoadingPortfolio(false);
+        setPortfolio(data.slice(0, 3));
       })
-      .catch((error) => {
-        console.error("Error fetching portfolio:", error);
-        setLoadingPortfolio(false);
-      });
+      .catch((error) => console.error("Failed to fetch portfolio", error))
+      .finally(() => setIsLoadingPortfolio(false));
   }, []);
 
-  // Function to navigate carousel images
-  const nextImage = (portfolioIndex) => {
-    setCurrentImageIndex((prevIndexes) => ({
-      ...prevIndexes,
-      [portfolioIndex]:
-        (prevIndexes[portfolioIndex] + 1) %
-        portfolio[portfolioIndex].images.length,
-    }));
-  };
-
-  const prevImage = (portfolioIndex) => {
-    setCurrentImageIndex((prevIndexes) => ({
-      ...prevIndexes,
-      [portfolioIndex]:
-        (prevIndexes[portfolioIndex] -
-          1 +
-          portfolio[portfolioIndex].images.length) %
-        portfolio[portfolioIndex].images.length,
-    }));
-  };
-
-  const toggleFaq = (index) => {
-    setActiveFaqIndex(activeFaqIndex === index ? null : index);
-  };
-
-  // Auto-rotate carousel images
-  useEffect(() => {
-    if (portfolio.length > 0) {
-      const intervals = portfolio.map((project, index) => {
-        if (project.images && project.images.length > 1) {
-          return setInterval(() => {
-            nextImage(index);
-          }, 5000);
-        }
-        return null;
-      });
-
-      return () => {
-        intervals.forEach((interval) => {
-          if (interval) clearInterval(interval);
-        });
-      };
-    }
-  }, [portfolio]);
-
-  // Hardcoded testimonials
-  const testimonials = [
-    {
-      id: 1,
-      name: "Ken Wekesa",
-      role: "Residential Renovation",
-      content: "Radamjaribu Builders transformed our home beyond expectations. Their attention to detail and professional approach made the entire process smooth and stress-free. The team was always punctual and maintained excellent communication throughout the project.",
-      rating: 5
-    },
-    {
-      id: 2,
-      name: "Sarah Mwangi",
-      role: "Commercial Building",
-      content: "Working with Radamjaribu Builders on our office complex was exceptional. They delivered ahead of schedule while maintaining the highest quality standards. Their expertise in commercial construction is truly impressive.",
-      rating: 5
-    },
-    {
-      id: 3,
-      name: "David Omondi",
-      role: "Home Extension",
-      content: "The team handled our home extension project with incredible professionalism. They were respectful of our space, kept the site clean, and the craftsmanship exceeded our expectations. Highly recommended!",
-      rating: 5
-    }
-  ];
-
-  // FAQ data
-  const faqData = [
-    {
-      question: "How long does a typical construction project take?",
-      answer: "Project timelines vary based on scope and complexity. Residential projects typically take 3-6 months, while commercial projects can range from 6-18 months. We provide detailed timelines during our initial consultation."
-    },
-    {
-      question: "Do you provide free consultations and quotes?",
-      answer: "Yes, we offer complimentary consultations and detailed quotes for all projects. Our team will assess your needs, discuss your vision, and provide a transparent cost breakdown without any obligation."
-    },
-    {
-      question: "What areas do you serve?",
-      answer: "We primarily serve Kakamega  and surrounding counties, but we undertake projects across Kenya. Distance may affect project timelines and costs, which we'll discuss during the quoting process."
-    },
-    {
-      question: "Are you licensed and insured?",
-      answer: "Absolutely. We are fully licensed, bonded, and insured. We carry comprehensive liability insurance and workers' compensation to protect both our team and your property throughout the construction process."
-    },
-    {
-      question: "Can you work with my architect or designer?",
-      answer: "Yes, we frequently collaborate with architects and designers. We're happy to work with your existing team or recommend trusted professionals we've successfully partnered with on previous projects."
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section - No Image */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 text-white py-20 md:py-28">
-        <div className="container mx-auto px-4 md:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Building Excellence, <br className="hidden md:block" /> Crafting
-            Legacy
-          </h1>
-          <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto opacity-90">
-            Professional construction services with over 10 years of experience
-            delivering quality projects on time and within budget.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-white text-blue-700 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-              Start Your Project
-            </button>
-            <button className="bg-transparent border-2 border-white hover:bg-white hover:text-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105">
-              View Our Work
-            </button>
+    <div className="min-h-screen bg-stone-50 text-slate-900">
+      <section className="overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(254,240,138,0.35),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#1d4ed8_48%,#0f766e_100%)] py-20 text-white md:py-28">
+        <div className="container mx-auto grid gap-12 px-4 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-amber-200">
+              Build with confidence
+            </p>
+            <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight md:text-6xl">
+              Professional construction services and reliable hardware supply
+              for every stage of your project
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg text-slate-200">
+              From new builds and renovations to plumbing works and material
+              sourcing, Radamjaribu Builders helps clients move from idea to
+              site execution with clear quotations and dependable delivery.
+            </p>
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+              <a
+                href="/booking"
+                className="inline-flex items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-slate-900 transition hover:bg-amber-200"
+              >
+                Request a free quote
+              </a>
+              <a
+                href="/hardware"
+                className="inline-flex items-center justify-center rounded-xl border border-white/30 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
+              >
+                Browse hardware supplies
+              </a>
+            </div>
+            <div className="mt-4">
+              <WhatsAppButton
+                label="WhatsApp the team"
+                message="Hello Radamjaribu Builders, I would like help with a construction quotation and materials."
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="rounded-[2rem] bg-white/10 p-4 backdrop-blur">
+              {heroVisuals.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {heroVisuals.map((item, index) => (
+                    <article
+                      key={item.id}
+                      className={`group overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/20 ${
+                        index === 0 ? "col-span-2 h-56" : "h-40"
+                      }`}
+                    >
+                      <div className="relative h-full">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <span className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/90">
+                            {item.tag}
+                          </span>
+                          <p className="mt-2 text-sm font-semibold text-white md:text-base">
+                            {item.title}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-2xl bg-white/10 p-4">
+                    <div className="text-3xl font-bold">60+</div>
+                    <div className="mt-1 text-sm text-slate-200">Projects completed</div>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 p-4">
+                    <div className="text-3xl font-bold">10+</div>
+                    <div className="mt-1 text-sm text-slate-200">Years experience</div>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 p-4">
+                    <div className="text-3xl font-bold">Reliable</div>
+                    <div className="mt-1 text-sm text-slate-200">Construction delivery</div>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 p-4">
+                    <div className="text-3xl font-bold">Fast</div>
+                    <div className="mt-1 text-sm text-slate-200">Hardware response</div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl bg-white/10 p-4">
+                  <div className="text-3xl font-bold">60+</div>
+                  <div className="mt-1 text-sm text-slate-200">Projects completed</div>
+                </div>
+                <div className="rounded-2xl bg-white/10 p-4">
+                  <div className="text-3xl font-bold">10+</div>
+                  <div className="mt-1 text-sm text-slate-200">Years experience</div>
+                </div>
+                <div className="rounded-2xl bg-white/10 p-4">
+                  <div className="text-3xl font-bold">Build</div>
+                  <div className="mt-1 text-sm text-slate-200">Construction and renovation</div>
+                </div>
+                <div className="rounded-2xl bg-white/10 p-4">
+                  <div className="text-3xl font-bold">Supply</div>
+                  <div className="mt-1 text-sm text-slate-200">Materials and hardware RFQ</div>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-3xl bg-white p-6 text-slate-900 shadow-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-700">
+                Start with the service you need
+              </p>
+              <div className="mt-4 space-y-4 text-sm text-slate-600">
+                <div>
+                  <p className="font-semibold text-slate-900">Construction and renovation</p>
+                  <p className="mt-1">
+                    Request quotations for homes, rental units, commercial spaces,
+                    finishes, and upgrades.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">Plumbing and fit-outs</p>
+                  <p className="mt-1">
+                    Get support for water systems, drainage, fixtures, and repair work.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">Hardware supplies</p>
+                  <p className="mt-1">
+                    Send your materials list for pricing, availability, and delivery options.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Trusted By Section */}
-      <section className="py-12 bg-gray-50">
+      <section className="bg-white py-12">
         <div className="container mx-auto px-4 md:px-8">
-          <p className="text-center text-gray-500 mb-8 text-sm uppercase tracking-wider font-semibold">
-            Trusted by industry leaders
+          <p className="text-center text-sm font-semibold uppercase tracking-[0.35em] text-slate-500">
+            Trusted suppliers and brands
           </p>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 items-center opacity-70">
+          <div className="mt-8 grid grid-cols-2 gap-4 text-center text-sm font-semibold text-slate-600 md:grid-cols-4 lg:grid-cols-7">
             {[
-              "Bamburi cement",
+              "Bamburi Cement",
               "Doshi",
-              "Simba cement",
-              "Rai cement",
-              "Lakhir plastics",
-              "Basco paints",
-              "Crown paints"
-            ].map((company, index) => (
-              <div key={index} className="text-lg font-semibold text-gray-700 transition-transform hover:scale-105">
-                {company}
+              "Simba Cement",
+              "Rai Cement",
+              "Lakhi",
+              "Basco",
+              "Crown Paints",
+            ].map((name) => (
+              <div key={name} className="rounded-2xl bg-stone-50 px-3 py-4">
+                {name}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Services Preview Section */}
-      <section className="py-20 px-4 md:px-8 bg-white">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Our Professional Services
-            </h2>
-            <div className="w-20 h-1 bg-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 mt-6 max-w-2xl mx-auto text-lg">
-              Comprehensive construction solutions tailored to meet your
-              specific needs and exceed expectations
+      <section className="container mx-auto px-4 py-14 md:px-8">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-700">
+              Services
             </p>
+            <h2 className="mt-2 text-3xl font-bold">Professional service lines</h2>
           </div>
-
-          {loadingServices ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {services.map((service) => (
-                <div
-                  key={service.id}
-                  className="group bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl border border-gray-100 hover:border-blue-200"
-                >
-                  <div className="relative overflow-hidden h-48 bg-gray-100 flex items-center justify-center">
+          <a href="/services" className="font-semibold text-blue-700">
+            View all services
+          </a>
+        </div>
+        {isLoadingServices ? (
+          <div className="rounded-3xl bg-white p-8 shadow-lg">Loading services...</div>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-3">
+            {services.map((service) => (
+              <article
+                key={service.id}
+                className="group overflow-hidden rounded-3xl bg-white shadow-lg transition hover:-translate-y-1 hover:shadow-2xl"
+              >
+                <div className="relative h-60 bg-slate-100">
+                  {service.image_url ? (
                     <img
                       src={service.image_url}
-                      alt={service.name || service.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      alt={service.name}
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                      {service.name}
-                    </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">{service.description}</p>
-                    <a
-                      href="/services"
-                      className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800 transition-all duration-300 group-hover:translate-x-1"
-                    >
-                      Learn More
-                      <svg
-                        className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M14 5l7 7m0 0l-7 7m7-7H3"
-                        ></path>
-                      </svg>
-                    </a>
+                  ) : null}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-900">
+                    Service
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          <div className="text-center mt-12">
-            <a
-              href="/services"
-              className="inline-flex items-center bg-blue-600 text-white font-medium py-3 px-8 rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              Explore All Services
-              <svg
-                className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                ></path>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Portfolio Preview Section */}
-      <section className="py-20 px-4 md:px-8 bg-gray-50">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Featured Projects
-            </h2>
-            <div className="w-20 h-1 bg-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 mt-6 max-w-2xl mx-auto text-lg">
-              Showcasing our excellence in delivering quality construction
-              projects across various sectors
-            </p>
-          </div>
-
-          {loadingPortfolio ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {portfolio.map((project, index) => (
-                <div
-                  key={project.id}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden group border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-2xl"
-                >
-                  <div className="relative h-60 overflow-hidden bg-gray-100">
-                    {project.images && project.images.length > 0 ? (
-                      <>
-                        <img
-                          src={project.images[currentImageIndex[index]].image_url}
-                          alt={project.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        {project.images.length > 1 && (
-                          <>
-                            <button
-                              onClick={() => prevImage(index)}
-                              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 text-white p-2 rounded-full hover:bg-opacity-80 transition-all duration-300 opacity-0 group-hover:opacity-100"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 19l-7-7 7-7"
-                                ></path>
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => nextImage(index)}
-                              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 text-white p-2 rounded-full hover:bg-opacity-80 transition-all duration-300 opacity-0 group-hover:opacity-100"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 5l7 7-7 7"
-                                ></path>
-                              </svg>
-                            </button>
-
-                            {/* Image indicators */}
-                            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                              {project.images.map((_, i) => (
-                                <div
-                                  key={i}
-                                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                                    i === currentImageIndex[index]
-                                      ? "bg-white scale-125"
-                                      : "bg-white bg-opacity-50"
-                                  }`}
-                                ></div>
-                              ))}
-                            </div>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <svg
-                          className="w-12 h-12"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                            clipRule="evenodd"
-                          ></path>
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                      {project.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
-                      {project.description}
-                    </p>
-                    <a
-                      href="/portfolio"
-                      className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800 transition-all duration-300 group-hover:translate-x-1"
-                    >
-                      View Case Study
-                      <svg
-                        className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M14 5l7 7m0 0l-7 7m7-7H3"
-                        ></path>
-                      </svg>
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold">{service.name}</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    {service.description}
+                  </p>
+                  <div className="mt-5 flex items-center justify-between gap-3">
+                    <a href="/booking" className="font-semibold text-blue-700">
+                      Request quote
                     </a>
+                    <WhatsAppButton
+                      label="WhatsApp"
+                      message={`Hello Radamjaribu Builders, I want a quote for ${service.name}.`}
+                      className="px-3 py-2 text-sm"
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          <div className="text-center mt-12">
-            <a
-              href="/portfolio"
-              className="inline-flex items-center bg-gray-800 text-white font-medium py-3 px-8 rounded-lg hover:bg-gray-900 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              View All Projects
-              <svg
-                className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                ></path>
-              </svg>
-            </a>
+              </article>
+            ))}
           </div>
-        </div>
+        )}
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-blue-900 text-white">
+      <section className="bg-slate-900 py-14 text-white">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { number: "60+", label: "Projects Completed" },
-              { number: "10+", label: "Years Experience" },
-              { number: "50+", label: "Expert Workers" },
-              { number: "98%", label: "Happy Clients" }
-            ].map((stat, index) => (
-              <div key={index} className="p-4 transform hover:scale-105 transition-transform duration-300">
-                <div className="text-4xl md:text-5xl font-bold mb-2">{stat.number}</div>
-                <div className="text-lg uppercase tracking-wider text-blue-200 font-medium">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Process Section */}
-      <section className="py-20 px-4 md:px-8 bg-white">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Our Process
-            </h2>
-            <div className="w-20 h-1 bg-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 mt-6 max-w-2xl mx-auto text-lg">
-              A structured approach to ensure quality and efficiency in every
-              project we undertake
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Consultation",
-                desc: "Understanding your vision and requirements",
-                icon: "1"
-              },
-              {
-                title: "Planning",
-                desc: "Detailed project planning and design",
-                icon: "2"
-              },
-              {
-                title: "Execution",
-                desc: "Quality construction with precision",
-                icon: "3"
-              },
-              { 
-                title: "Completion", 
-                desc: "Final delivery and follow-up",
-                icon: "4"
-              },
-            ].map((step, index) => (
-              <div
-                key={index}
-                className="text-center p-6 bg-gray-50 rounded-xl hover:bg-blue-50 transition-all duration-300 group border border-gray-100 hover:border-blue-200"
-              >
-                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl group-hover:scale-110 transition-transform duration-300">
-                  {step.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 px-4 md:px-8 bg-gray-50">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Client Testimonials
-            </h2>
-            <div className="w-20 h-1 bg-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 mt-6 max-w-2xl mx-auto text-lg">
-              What our clients say about our work and services
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial) => (
-              <div key={testimonial.id} className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-                <div className="flex items-center mb-4">
-                  <div className="text-yellow-400 flex">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <svg
-                        key={i}
-                        className="w-5 h-5 fill-current"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-600 mb-6 italic leading-relaxed">
-                  "{testimonial.content}"
-                </p>
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mr-4 flex items-center justify-center text-white font-bold text-lg">
-                    {testimonial.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-800">{testimonial.name}</div>
-                    <div className="text-sm text-gray-500">{testimonial.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-20 px-4 md:px-8 bg-white">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Frequently Asked Questions
-            </h2>
-            <div className="w-20 h-1 bg-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 mt-6 max-w-2xl mx-auto text-lg">
-              Find answers to common questions about our construction services
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {faqData.map((faq, index) => (
-              <div key={index} className="border border-gray-200 rounded-xl overflow-hidden hover:border-blue-300 transition-colors duration-300">
-                <button
-                  className="w-full px-6 py-5 text-left bg-gray-50 hover:bg-blue-50 transition-colors duration-300 flex justify-between items-center"
-                  onClick={() => toggleFaq(index)}
-                >
-                  <span className="font-semibold text-gray-800 text-lg">{faq.question}</span>
-                  <svg
-                    className={`w-5 h-5 text-blue-600 transition-transform duration-300 ${
-                      activeFaqIndex === index ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                <div
-                  className={`px-6 overflow-hidden transition-all duration-300 ${
-                    activeFaqIndex === index ? 'py-5 bg-white' : 'max-h-0 py-0'
-                  }`}
-                >
-                  <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-gray-600 mb-6">
-              Still have questions? We're here to help!
-            </p>
-            <a
-              href="/contact"
-              className="inline-flex items-center bg-blue-600 text-white font-medium py-3 px-8 rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              Contact Us
-              <svg
-                className="w-4 h-4 ml-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                ></path>
-              </svg>
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-300">
+                Case Studies
+              </p>
+              <h2 className="mt-2 text-3xl font-bold">Show real outcomes, not just gallery images</h2>
+            </div>
+            <a href="/portfolio" className="font-semibold text-amber-300">
+              View portfolio
             </a>
           </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {caseStudyItems.map((item) => (
+              <article key={item.id} className="rounded-3xl bg-white/10 p-6 backdrop-blur">
+                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-200">{item.summary}</p>
+                <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
+                  <div className="rounded-2xl bg-white/10 p-3">
+                    <span className="block text-slate-300">Timeline</span>
+                    <strong>{item.timeline}</strong>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 p-3">
+                    <span className="block text-slate-300">Budget</span>
+                    <strong>{item.budget}</strong>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-amber-200">{item.impact}</p>
+              </article>
+            ))}
+          </div>
+
+          {!isLoadingPortfolio && portfolio.length > 0 ? (
+            <div className="mt-8 grid gap-6 lg:grid-cols-3">
+              {portfolio.map((project) => (
+                <article
+                  key={project.id}
+                  className="group overflow-hidden rounded-3xl bg-white text-slate-900 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl"
+                >
+                  <div className="relative h-64 bg-slate-100">
+                    {project.image_url ? (
+                      <img
+                        src={project.image_url}
+                        alt={project.title || project.tittle}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    ) : project.images?.[0]?.image_url ? (
+                      <img
+                        src={project.images[0].image_url}
+                        alt={project.title || project.tittle}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent" />
+                    <div className="absolute bottom-4 left-4 rounded-full bg-amber-300 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-900">
+                      Featured Project
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold">
+                      {project.title || project.tittle}
+                    </h3>
+                    <p className="mt-3 text-sm text-slate-600">{project.description}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 
-      {/* Contact CTA Section */}
-      <section className="py-20 px-4 md:px-8 bg-gradient-to-r from-blue-600 to-blue-700">
-        <div className="container mx-auto text-center max-w-3xl">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-            Ready to Start Your Project?
-          </h2>
-          <p className="text-xl mb-10 text-blue-100 leading-relaxed">
-            Get in touch with us for a free consultation and quote. Let's build
-            something amazing together.
+      <section className="container mx-auto px-4 py-14 md:px-8">
+        <div className="mb-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-700">
+            Testimonials
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
+          <h2 className="mt-2 text-3xl font-bold">
+            {settings?.google_reviews?.length > 0
+              ? "Live social proof from Google reviews"
+              : "Proof that speaks to new clients"}
+          </h2>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          {reviewsToShow.map((item) => (
+            <article key={item.id} className="rounded-3xl bg-white p-6 shadow-lg">
+              <p className="text-lg leading-8 text-slate-700">"{item.quote}"</p>
+              <div className="mt-6 border-t border-slate-100 pt-4">
+                <div className="font-semibold">{item.name}</div>
+                <div className="text-sm text-slate-500">
+                  {item.project} • {item.location}
+                </div>
+                <p className="mt-3 text-sm text-slate-600">{item.result}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-amber-100 py-14">
+        <div className="container mx-auto rounded-[2rem] bg-slate-900 px-6 py-10 text-white shadow-2xl md:px-10">
+          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-300">
+                Hardware Store
+              </p>
+              <h2 className="mt-2 text-3xl font-bold">
+                Start with a category catalog and RFQ, then grow into full commerce later
+              </h2>
+              <p className="mt-4 max-w-2xl text-slate-300">
+                The new hardware page lets customers ask for price, availability,
+                and delivery without waiting for cart, payment, and stock sync work.
+              </p>
+            </div>
             <a
-              href="/contact"
-              className="inline-block bg-white hover:bg-gray-100 text-blue-600 font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              href="/hardware"
+              className="inline-flex items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-slate-900 transition hover:bg-amber-200"
             >
-              Request a Quote
-            </a>
-            <a
-              href="/contact"
-              className="inline-block bg-transparent border-2 border-white hover:bg-white hover:text-blue-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105"
-            >
-              Contact Us
+              Open hardware catalog
             </a>
           </div>
         </div>
       </section>
     </div>
   );
-};
-
-export default HomePage;
+}

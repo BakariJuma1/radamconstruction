@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Menu, X, ChevronDown, User, LogOut, Quote } from "lucide-react";
+import { Menu, X, User, LogOut, Quote, Store } from "lucide-react";
 import { AuthContext } from "../AuthContext";
 
 const Navbar = () => {
@@ -20,6 +20,7 @@ const Navbar = () => {
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
     { href: "/portfolio", label: "Projects" },
+    { href: "/hardware", label: "Hardware" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -71,6 +72,13 @@ const Navbar = () => {
           
           {/* User Section */}
           <div className="flex items-center space-x-4 ml-4 pl-4 border-l border-gray-200">
+            <a
+              href="/hardware"
+              className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
+            >
+              <Store size={18} />
+              <span>Store RFQ</span>
+            </a>
             {user ? (
               <div className="flex items-center space-x-3">
                 <a 
@@ -99,7 +107,7 @@ const Navbar = () => {
             
             {/* CTA Button */}
             <a
-              href="/contact"
+              href="/booking"
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center space-x-2"
             >
               <Quote size={18} />
@@ -172,7 +180,7 @@ const Navbar = () => {
             )}
             
             <a
-              href="/contact"
+              href="/booking"
               className="flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-4 rounded-lg mt-2 shadow-lg"
             >
               <Quote size={18} />

@@ -1,14 +1,22 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../AuthContext";
+import { SiteSettingsContext } from "../SiteSettingsContext";
 
 const AdminDashboard = () => {
   const { user, token, logout } = useContext(AuthContext);
+  const { refreshSettings } = useContext(SiteSettingsContext);
   const [activeTab, setActiveTab] = useState("bookings");
   const [bookings, setBookings] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [services, setServices] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
+  const [hardwareCategories, setHardwareCategories] = useState([]);
+  const [siteSettings, setSiteSettings] = useState({
+    whatsapp_number: "",
+    google_business_name: "",
+    google_reviews_json: "",
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -27,6 +35,17 @@ const AdminDashboard = () => {
     title: "",
     description: "",
     images: [],
+  });
+  const [newHardwareCategory, setNewHardwareCategory] = useState({
+    name: "",
+    description: "",
+  });
+  const [newHardwareItem, setNewHardwareItem] = useState({
+    category_id: "",
+    name: "",
+    description: "",
+    price: "",
+    unit: "",
   });
 
   // Toggle item expansion for mobile
@@ -145,6 +164,25 @@ const AdminDashboard = () => {
                 "https://radamconstruction.onrender.com/portfolio"
               );
               setPortfolio(portfolioRes.data);
+              break;
+            case "hardware":
+              const hardwareRes = await axios.get(
+                "https://radamconstruction.onrender.com/hardware-categories"
+              );
+              setHardwareCategories(hardwareRes.data);
+              break;
+            case "settings":
+              const settingsRes = await axios.get(
+                "https://radamconstruction.onrender.com/settings",
+                config
+              );
+              setSiteSettings({
+                whatsapp_number: settingsRes.data.whatsapp_number || "",
+                google_business_name:
+                  settingsRes.data.google_business_name || "",
+                google_reviews_json:
+                  settingsRes.data.google_reviews_json || "",
+              });
               break;
             default:
               break;
@@ -322,6 +360,12 @@ const AdminDashboard = () => {
         case "contact":
           endpoint = `https://radamconstruction.onrender.com/contacts/${id}`;
           break;
+        case "hardware-category":
+          endpoint = `https://radamconstruction.onrender.com/hardware-categories/${id}`;
+          break;
+        case "hardware-item":
+          endpoint = `https://radamconstruction.onrender.com/hardware-items/${id}`;
+          break;
         default:
           return;
       }
@@ -341,6 +385,10 @@ const AdminDashboard = () => {
           break;
         case "contact":
           setContacts(contacts.filter((item) => item.id !== id));
+          break;
+        case "hardware-category":
+        case "hardware-item":
+          await refreshHardwareCategories();
           break;
         default:
           break;
@@ -364,6 +412,121 @@ const AdminDashboard = () => {
   const handleImageUpload = (e, setter, field) => {
     const files = Array.from(e.target.files);
     setter((prev) => ({ ...prev, [field]: files }));
+  };
+
+  const refreshHardwareCategories = async () => {
+    const response = await axios.get(
+      "https://radamconstruction.onrender.com/hardware-categories"
+    );
+    setHardwareCategories(response.data);
+  };
+
+  const handleHardwareCategorySubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateAuth()) return;
+
+    setLoading(true);
+    try {
+      await axios.post(
+        "https://radamconstruction.onrender.com/hardware-categories",
+        newHardwareCategory,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setNewHardwareCategory({ name: "", description: "" });
+      await refreshHardwareCategories();
+      showMessage("Hardware category added", "success");
+    } catch (error) {
+      console.error("Error creating hardware category:", error);
+      showMessage(
+        error.response?.data?.error || "Error creating hardware category",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleHardwareItemSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateAuth()) return;
+
+    setLoading(true);
+    try {
+      await axios.post(
+        "https://radamconstruction.onrender.com/hardware-items",
+        newHardwareItem,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setNewHardwareItem({
+        category_id: "",
+        name: "",
+        description: "",
+        price: "",
+        unit: "",
+      });
+      await refreshHardwareCategories();
+      showMessage("Hardware item added", "success");
+    } catch (error) {
+      console.error("Error creating hardware item:", error);
+      showMessage(
+        error.response?.data?.error || "Error creating hardware item",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSettingsSave = async (e) => {
+    e.preventDefault();
+
+    if (!validateAuth()) return;
+
+    setLoading(true);
+    try {
+      const response = await axios.put(
+        "https://radamconstruction.onrender.com/settings",
+        siteSettings,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setSiteSettings({
+        whatsapp_number: response.data.whatsapp_number || "",
+        google_business_name: response.data.google_business_name || "",
+        google_reviews_json: response.data.google_reviews_json || "",
+      });
+      await refreshSettings();
+      showMessage("Site settings updated", "success");
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      if (error.response?.status === 401) {
+        showMessage("Session expired. Please log in again.", "error");
+        logout();
+      } else if (error.response?.data?.error) {
+        showMessage(error.response.data.error, "error");
+      } else {
+        showMessage("Error updating settings", "error");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Status badge component
@@ -460,7 +623,11 @@ const AdminDashboard = () => {
                 {bookings.length +
                   contacts.length +
                   services.length +
-                  portfolio.length}{" "}
+                  portfolio.length +
+                  hardwareCategories.reduce(
+                    (total, category) => total + 1 + category.items.length,
+                    0
+                  )}{" "}
                 items
               </div>
             </div>
@@ -1148,6 +1315,308 @@ const AdminDashboard = () => {
               </div>
             </div>
           )}
+
+          {activeTab === "settings" && token && !loading && (
+            <div className="space-y-6">
+              <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <span className="mr-2">⚙️</span>
+                  Site Settings
+                </h3>
+                <form onSubmit={handleSettingsSave} className="space-y-5">
+                  <div>
+                    <label
+                      htmlFor="whatsapp-number"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      WhatsApp Number
+                    </label>
+                    <input
+                      type="text"
+                      id="whatsapp-number"
+                      value={siteSettings.whatsapp_number}
+                      onChange={(e) =>
+                        setSiteSettings({
+                          ...siteSettings,
+                          whatsapp_number: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                      placeholder="254700123456"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Use international format without plus signs or spaces.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="google-business-name"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Google Business Name
+                    </label>
+                    <input
+                      type="text"
+                      id="google-business-name"
+                      value={siteSettings.google_business_name}
+                      onChange={(e) =>
+                        setSiteSettings({
+                          ...siteSettings,
+                          google_business_name: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                      placeholder="Radamjaribu Builders"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="google-reviews-json"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Google Reviews JSON
+                    </label>
+                    <textarea
+                      id="google-reviews-json"
+                      rows={10}
+                      value={siteSettings.google_reviews_json}
+                      onChange={(e) =>
+                        setSiteSettings({
+                          ...siteSettings,
+                          google_reviews_json: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 resize-vertical font-mono text-sm"
+                      placeholder='[{"author_name":"Jane","text":"Excellent work","rating":5,"relative_time_description":"2 weeks ago"}]'
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      When this field has reviews, the homepage uses them. When
+                      it is empty, the app falls back to the built-in testimonials.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  >
+                    Save Settings
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+          {activeTab === "hardware" && token && !loading && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Add Hardware Category
+                  </h3>
+                  <form onSubmit={handleHardwareCategorySubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      value={newHardwareCategory.name}
+                      onChange={(e) =>
+                        setNewHardwareCategory({
+                          ...newHardwareCategory,
+                          name: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                      placeholder="Category name"
+                      required
+                    />
+                    <textarea
+                      rows={4}
+                      value={newHardwareCategory.description}
+                      onChange={(e) =>
+                        setNewHardwareCategory({
+                          ...newHardwareCategory,
+                          description: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                      placeholder="Optional category description"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      Add Category
+                    </button>
+                  </form>
+                </div>
+
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Add Hardware Item
+                  </h3>
+                  <form onSubmit={handleHardwareItemSubmit} className="space-y-4">
+                    <select
+                      value={newHardwareItem.category_id}
+                      onChange={(e) =>
+                        setNewHardwareItem({
+                          ...newHardwareItem,
+                          category_id: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                      required
+                    >
+                      <option value="">Select category</option>
+                      {hardwareCategories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      value={newHardwareItem.name}
+                      onChange={(e) =>
+                        setNewHardwareItem({
+                          ...newHardwareItem,
+                          name: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                      placeholder="Item name"
+                      required
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        value={newHardwareItem.price}
+                        onChange={(e) =>
+                          setNewHardwareItem({
+                            ...newHardwareItem,
+                            price: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                        placeholder="Price (optional)"
+                      />
+                      <input
+                        type="text"
+                        value={newHardwareItem.unit}
+                        onChange={(e) =>
+                          setNewHardwareItem({
+                            ...newHardwareItem,
+                            unit: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                        placeholder="Unit e.g. bag, piece"
+                      />
+                    </div>
+                    <textarea
+                      rows={4}
+                      value={newHardwareItem.description}
+                      onChange={(e) =>
+                        setNewHardwareItem({
+                          ...newHardwareItem,
+                          description: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                      placeholder="Optional item description"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      Add Item
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Hardware Catalog ({hardwareCategories.length} categories)
+                </h3>
+                {hardwareCategories.length === 0 ? (
+                  <EmptyState
+                    message="No hardware categories found yet. Add your first category."
+                    icon="🏪"
+                  />
+                ) : (
+                  hardwareCategories.map((category) => (
+                    <div
+                      key={category.id}
+                      className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900">
+                            {category.name}
+                          </h4>
+                          {category.description ? (
+                            <p className="text-sm text-gray-600 mt-2">
+                              {category.description}
+                            </p>
+                          ) : null}
+                        </div>
+                        <button
+                          onClick={() => deleteItem("hardware-category", category.id)}
+                          className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 text-sm font-medium"
+                        >
+                          Delete Category
+                        </button>
+                      </div>
+
+                      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {category.items.length === 0 ? (
+                          <div className="text-sm text-gray-500">
+                            No items in this category yet.
+                          </div>
+                        ) : (
+                          category.items.map((item) => (
+                            <div
+                              key={item.id}
+                              className="rounded-lg border border-gray-200 p-4 bg-gray-50"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <h5 className="font-semibold text-gray-900">
+                                    {item.name}
+                                  </h5>
+                                  {item.description ? (
+                                    <p className="text-sm text-gray-600 mt-1">
+                                      {item.description}
+                                    </p>
+                                  ) : null}
+                                  {item.price || item.unit ? (
+                                    <p className="text-sm text-blue-700 mt-2 font-medium">
+                                      {item.price
+                                        ? `KES ${Number(item.price).toLocaleString()}`
+                                        : "Price on request"}
+                                      {item.unit ? ` / ${item.unit}` : ""}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <button
+                                  onClick={() => deleteItem("hardware-item", item.id)}
+                                  className="text-red-600 text-sm font-medium"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </main>
       </div>
       {/* Enhanced Sidebar */}
@@ -1173,6 +1642,8 @@ const AdminDashboard = () => {
             { id: "contacts", icon: "📞", label: "Contacts" },
             { id: "services", icon: "🛠️", label: "Services" },
             { id: "portfolio", icon: "📁", label: "Portfolio" },
+            { id: "hardware", icon: "🏪", label: "Hardware" },
+            { id: "settings", icon: "⚙️", label: "Settings" },
           ].map((tab) => (
             <button
               key={tab.id}
