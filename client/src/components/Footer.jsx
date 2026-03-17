@@ -48,7 +48,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4">
           <div>
             <div className="flex items-center mb-4">
-              <div className="bg-blue-600 text-white font-bold text-xl p-2 mr-2">R</div>
+              <img
+                src="/rjb.png"
+                alt="RJB logo"
+                className="mr-2 h-10 w-10 rounded-full bg-white object-contain p-1"
+              />
               <span className="text-xl font-bold">adamjaribu Builders</span>
             </div>
             <p className="text-gray-400 mb-4">

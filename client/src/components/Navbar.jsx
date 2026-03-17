@@ -42,9 +42,11 @@ const Navbar = () => {
           <div className="flex items-center justify-between gap-3 py-3 lg:gap-6 lg:py-4">
             <Link to="/" className="min-w-0 flex-1 lg:flex-none">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-sm border border-slate-900 bg-slate-900 text-lg font-black text-white shadow-sm sm:h-12 sm:w-12 sm:text-xl lg:h-14 lg:w-14 lg:text-2xl">
-                  R
-                </div>
+                <img
+                  src="/rjb.png"
+                  alt="RJB logo"
+                  className="h-11 w-11 flex-shrink-0 rounded-full border border-slate-200 bg-white object-contain p-1 shadow-sm sm:h-12 sm:w-12 lg:h-14 lg:w-14"
+                />
                 <div className="min-w-0">
                   <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-amber-700 sm:text-[10px] lg:text-[11px] lg:tracking-[0.35em]">
                     Since 2009
