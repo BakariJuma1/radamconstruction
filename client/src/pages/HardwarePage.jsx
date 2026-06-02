@@ -3,6 +3,7 @@ import axios from "axios";
 import WhatsAppButton from "../components/WhatsAppButton";
 import { API_BASE_URL } from "../config";
 import { hardwareCategories } from "../data/siteContent";
+import { HardwareCategorySkeleton } from "../components/Skeleton";
 
 const initialForm = {
   name: "",
@@ -197,6 +198,10 @@ export default function HardwarePage() {
                 </article>
               ))
             )
+          ) : loadingCatalog ? (
+            <>
+              {Array.from({ length: 4 }).map((_, i) => <HardwareCategorySkeleton key={i} />)}
+            </>
           ) : (
           mergedCategories.map((category) => (
             <article key={category.id} className="rounded-3xl bg-white p-5 shadow-lg sm:p-6">

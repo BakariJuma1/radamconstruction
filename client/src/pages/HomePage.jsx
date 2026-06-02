@@ -5,6 +5,7 @@ import WhatsAppButton from "../components/WhatsAppButton";
 import { API_BASE_URL } from "../config";
 import { caseStudyItems, testimonialItems } from "../data/siteContent";
 import { SiteSettingsContext } from "../SiteSettingsContext";
+import { HomeServiceCardSkeleton, HomePortfolioCardSkeleton } from "../components/Skeleton";
 
 export default function HomePage() {
   const { settings } = useContext(SiteSettingsContext);
@@ -251,7 +252,9 @@ export default function HomePage() {
           </Link>
         </div>
         {isLoadingServices ? (
-          <div className="rounded-3xl bg-white p-8 shadow-lg">Loading services...</div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => <HomeServiceCardSkeleton key={i} />)}
+          </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-3">
             {services.map((service) => (
@@ -324,72 +327,75 @@ export default function HomePage() {
             ))}
           </div>
 
-          {!isLoadingPortfolio && portfolio.length > 0 ? (
-            <div className="mt-8">
-              <div className="mb-6 flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-300">
-                    Project Gallery
-                  </p>
-                  <h3 className="mt-2 text-2xl font-bold text-white">
-                    Real images from completed and ongoing works
-                  </h3>
-                </div>
-              </div>
-
-              <div className="grid gap-6 lg:grid-cols-3">
-              {portfolio.map((project) => (
-                <article
-                  key={project.id}
-                  className="group overflow-hidden rounded-3xl bg-white text-slate-900 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl"
-                >
-                  <div className="relative h-64 bg-slate-100">
-                    {project.image_url ? (
-                      <img
-                        src={project.image_url}
-                    
-                        alt={project.title || project.tittle}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      />
-                    ) : project.images?.[0]?.image_url ? (
-                      <img
-                        src={project.images[0].image_url}
-                        alt={project.title || project.tittle}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      />
-                    ) : null}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent" />
-                    <div className="absolute bottom-4 left-4 rounded-full bg-amber-300 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-900">
-                      Featured Project
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold">
-                      {project.title || project.tittle}
-                    </h3>
-                    <p className="mt-3 text-sm text-slate-600">{project.description}</p>
-                    {project.images && project.images.length > 1 ? (
-                      <div className="mt-4 grid grid-cols-3 gap-2">
-                        {project.images.slice(0, 3).map((image, index) => (
-                          <div
-                            key={image.id || index}
-                            className="h-20 overflow-hidden rounded-xl bg-slate-100"
-                          >
-                            <img
-                              src={image.image_url}
-                              alt={`${project.title || project.tittle} ${index + 1}`}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </article>
-              ))}
+          <div className="mt-8">
+            <div className="mb-6 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-300">
+                  Project Gallery
+                </p>
+                <h3 className="mt-2 text-2xl font-bold text-white">
+                  Real images from completed and ongoing works
+                </h3>
               </div>
             </div>
-          ) : null}
+
+            {isLoadingPortfolio ? (
+              <div className="grid gap-6 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => <HomePortfolioCardSkeleton key={i} />)}
+              </div>
+            ) : portfolio.length > 0 ? (
+              <div className="grid gap-6 lg:grid-cols-3">
+                {portfolio.map((project) => (
+                  <article
+                    key={project.id}
+                    className="group overflow-hidden rounded-3xl bg-white text-slate-900 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl"
+                  >
+                    <div className="relative h-64 bg-slate-100">
+                      {project.image_url ? (
+                        <img
+                          src={project.image_url}
+                          alt={project.title || project.tittle}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      ) : project.images?.[0]?.image_url ? (
+                        <img
+                          src={project.images[0].image_url}
+                          alt={project.title || project.tittle}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      ) : null}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent" />
+                      <div className="absolute bottom-4 left-4 rounded-full bg-amber-300 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-900">
+                        Featured Project
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold">
+                        {project.title || project.tittle}
+                      </h3>
+                      <p className="mt-3 text-sm text-slate-600">{project.description}</p>
+                      {project.images && project.images.length > 1 ? (
+                        <div className="mt-4 grid grid-cols-3 gap-2">
+                          {project.images.slice(0, 3).map((image, index) => (
+                            <div
+                              key={image.id || index}
+                              className="h-20 overflow-hidden rounded-xl bg-slate-100"
+                            >
+                              <img
+                                src={image.image_url}
+                                alt={`${project.title || project.tittle} ${index + 1}`}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
       </section>
 

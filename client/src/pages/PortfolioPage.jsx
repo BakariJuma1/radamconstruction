@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { PortfolioCardSkeleton } from "../components/Skeleton";
 
 const PortfolioPage = () => {
   const [portfolioItems, setPortfolioItems] = useState([]);
@@ -183,9 +184,8 @@ const PortfolioPage = () => {
               </button>
             </div>
           ) : loading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-              <p className="ml-3 text-gray-600">Loading projects...</p>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => <PortfolioCardSkeleton key={i} />)}
             </div>
           ) : filteredItems.length === 0 ? (
             <div className="text-center py-8 bg-gray-50 rounded-lg">

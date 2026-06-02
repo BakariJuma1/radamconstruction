@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { ServiceCardSkeleton } from "../components/Skeleton";
 
 const ServicesPage = () => {
   const [services, setServices] = useState([]);
@@ -145,9 +146,8 @@ const ServicesPage = () => {
               </button>
             </div>
           ) : loading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-              <p className="ml-3 text-gray-600">Loading services...</p>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => <ServiceCardSkeleton key={i} />)}
             </div>
           ) : services.length === 0 ? (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
