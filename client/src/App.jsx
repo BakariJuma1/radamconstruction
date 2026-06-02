@@ -9,7 +9,7 @@ import Footer from "./components/Footer.jsx";
 import Contact from "./pages/Contact.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import HardwarePage from "./pages/HardwarePage.jsx";
-import WhatsAppButton from "./components/WhatsAppButton.jsx";
+import ChatWidget from "./components/ChatWidget.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 
@@ -35,7 +35,7 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
       </div>
-      <WhatsAppButton floating />
+      {isAdminRoute ? null : <ChatWidget />}
       {isAdminRoute ? null : <Footer />}
     </>
   );
