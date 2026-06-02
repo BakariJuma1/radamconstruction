@@ -60,6 +60,9 @@ const AdminDashboard = () => {
   });
   const [editingTeamMemberId, setEditingTeamMemberId] = useState(null);
   const [aiLoading, setAiLoading] = useState("");
+  const [replyDraft, setReplyDraft] = useState({ open: false, generating: false, sending: false, to: "", toName: "", subject: "", body: "", sent: false });
+  const [triageData, setTriageData] = useState({});
+  const [triageLoading, setTriageLoading] = useState(false);
 
   const enhanceDescription = async (text, type, setter, field) => {
     if (!text.trim()) {
@@ -78,6 +81,57 @@ const AdminDashboard = () => {
       showMessage("AI enhancement failed. Please try again.", "error");
     } finally {
       setAiLoading("");
+    }
+  };
+
+  const generateReplyDraft = async (item, type) => {
+    setReplyDraft({ open: true, generating: true, sending: false, to: item.email, toName: item.name, subject: "", body: "", sent: false });
+    try {
+      const res = await axios.post(
+        "https://radamconstruction.onrender.com/ai/draft-reply",
+        { type, data: item },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setReplyDraft((prev) => ({ ...prev, generating: false, subject: res.data.subject, body: res.data.body }));
+    } catch {
+      setReplyDraft((prev) => ({ ...prev, generating: false }));
+      showMessage("Failed to generate reply. Please try again.", "error");
+    }
+  };
+
+  const sendReplyEmail = async () => {
+    setReplyDraft((prev) => ({ ...prev, sending: true }));
+    try {
+      await axios.post(
+        "https://radamconstruction.onrender.com/ai/send-reply",
+        { to: replyDraft.to, toName: replyDraft.toName, subject: replyDraft.subject, body: replyDraft.body },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setReplyDraft((prev) => ({ ...prev, sending: false, sent: true }));
+      showMessage("Reply sent successfully!", "success");
+      setTimeout(() => setReplyDraft({ open: false, generating: false, sending: false, to: "", toName: "", subject: "", body: "", sent: false }), 2000);
+    } catch {
+      setReplyDraft((prev) => ({ ...prev, sending: false }));
+      showMessage("Failed to send reply. Please try again.", "error");
+    }
+  };
+
+  const runTriageBookings = async (bookingList) => {
+    if (triageLoading || !bookingList.length) return;
+    setTriageLoading(true);
+    try {
+      const res = await axios.post(
+        "https://radamconstruction.onrender.com/ai/triage-bookings",
+        { bookings: bookingList.map((b) => ({ id: b.id, name: b.name, message: b.message, service: b.service })) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const map = {};
+      (res.data.results || []).forEach((t) => { map[t.id] = t; });
+      setTriageData((prev) => ({ ...prev, ...map }));
+    } catch (e) {
+      console.error("Triage failed", e);
+    } finally {
+      setTriageLoading(false);
     }
   };
 
@@ -277,6 +331,13 @@ const AdminDashboard = () => {
       URL.revokeObjectURL(previewUrl);
     };
   }, [newService.images]);
+
+  useEffect(() => {
+    if (activeTab === "bookings" && bookings.length > 0) {
+      const untriaged = bookings.filter((b) => !triageData[b.id]);
+      if (untriaged.length > 0) runTriageBookings(untriaged);
+    }
+  }, [bookings]);
 
   const resetServiceForm = () => {
     setNewService({ title: "", description: "", price: "", images: [] });
@@ -1193,13 +1254,28 @@ const AdminDashboard = () => {
                       >
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <h4 className="font-semibold text-gray-900 truncate">
                                 {booking.name}
                               </h4>
                               {!booking.is_read ? (
                                 <span className="rounded-full bg-sky-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-sky-700">
                                   New
+                                </span>
+                              ) : null}
+                              {triageData[booking.id] ? (
+                                <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                                  triageData[booking.id].priority === "urgent"
+                                    ? "bg-red-100 text-red-700"
+                                    : triageData[booking.id].priority === "normal"
+                                    ? "bg-amber-100 text-amber-700"
+                                    : "bg-green-100 text-green-700"
+                                }`}>
+                                  {triageData[booking.id].label}
+                                </span>
+                              ) : triageLoading ? (
+                                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] text-slate-400">
+                                  Analysing…
                                 </span>
                               ) : null}
                             </div>
@@ -1335,15 +1411,24 @@ const AdminDashboard = () => {
                                   </select>
                                 </div>
                               </div>
-                              {!booking.is_read ? (
+                              <div className="flex flex-wrap gap-2">
                                 <button
                                   type="button"
-                                  onClick={() => markItemAsRead("booking", booking.id)}
-                                  className="rounded-lg bg-sky-100 px-4 py-2 text-sm font-medium text-sky-700 hover:bg-sky-200"
+                                  onClick={() => generateReplyDraft(booking, "booking")}
+                                  className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 hover:bg-violet-100"
                                 >
-                                  Mark as read
+                                  ✦ Draft Reply
                                 </button>
-                              ) : null}
+                                {!booking.is_read ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => markItemAsRead("booking", booking.id)}
+                                    className="rounded-lg bg-sky-100 px-4 py-2 text-sm font-medium text-sky-700 hover:bg-sky-200"
+                                  >
+                                    Mark as read
+                                  </button>
+                                ) : null}
+                              </div>
                             </div>
                           </div>
                         )}
@@ -1488,6 +1573,13 @@ const AdminDashboard = () => {
 
                             <div className="flex justify-end">
                               <div className="flex flex-col sm:flex-row gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => generateReplyDraft(contact, "contact")}
+                                  className="flex items-center gap-1.5 px-4 py-2 bg-violet-50 text-violet-700 rounded-lg hover:bg-violet-100 transition-colors duration-200 text-sm font-medium"
+                                >
+                                  ✦ Draft Reply
+                                </button>
                                 {!contact.is_read ? (
                                   <button
                                     type="button"
@@ -2691,6 +2783,89 @@ const AdminDashboard = () => {
           className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
+      )}
+
+      {/* AI Reply Draft Modal */}
+      {replyDraft.open && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 overflow-y-auto">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Reply to {replyDraft.toName}
+                </h3>
+                <p className="text-sm text-gray-500">{replyDraft.to}</p>
+              </div>
+              <button
+                onClick={() => setReplyDraft((prev) => ({ ...prev, open: false }))}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {replyDraft.generating ? (
+              <div className="flex flex-col items-center gap-4 py-16">
+                <div className="w-10 h-10 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
+                <p className="text-sm text-gray-500">Generating professional reply…</p>
+              </div>
+            ) : replyDraft.sent ? (
+              <div className="flex flex-col items-center gap-3 py-16 text-green-600">
+                <svg className="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <p className="text-lg font-semibold">Email sent!</p>
+              </div>
+            ) : (
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                  <input
+                    type="text"
+                    value={replyDraft.subject}
+                    onChange={(e) => setReplyDraft((prev) => ({ ...prev, subject: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-700">Body</label>
+                    <span className="text-xs text-gray-400">AI-generated — edit before sending</span>
+                  </div>
+                  <textarea
+                    rows={14}
+                    value={replyDraft.body}
+                    onChange={(e) => setReplyDraft((prev) => ({ ...prev, body: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-vertical font-mono text-sm leading-relaxed"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    onClick={() => setReplyDraft((prev) => ({ ...prev, open: false }))}
+                    className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={sendReplyEmail}
+                    disabled={replyDraft.sending || !replyDraft.subject || !replyDraft.body}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 font-medium"
+                  >
+                    {replyDraft.sending ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Sending…
+                      </>
+                    ) : "Send Email"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

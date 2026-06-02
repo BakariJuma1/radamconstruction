@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import WhatsAppButton from "../components/WhatsAppButton";
 import { API_BASE_URL } from "../config";
@@ -18,6 +18,11 @@ export default function HardwarePage() {
   const [loadingCatalog, setLoadingCatalog] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const searchRef = useRef(null);
 
   useEffect(() => {
     axios
@@ -56,6 +61,28 @@ export default function HardwarePage() {
         )
     ),
   ];
+
+  const doHardwareSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    setHasSearched(false);
+    try {
+      const res = await axios.post(`${API_BASE_URL}/ai/hardware-search`, { query: searchQuery.trim() });
+      setSearchResults(res.data.results || []);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+      setHasSearched(true);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+    setHasSearched(false);
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -96,9 +123,82 @@ export default function HardwarePage() {
         </div>
       </section>
 
-      <section className="container mx-auto grid gap-8 px-4 py-12 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="container mx-auto px-4 pt-8 pb-4 md:px-8">
+        <form onSubmit={doHardwareSearch} className="flex items-center gap-3 max-w-2xl">
+          <div className="relative flex-1">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              ref={searchRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder='Ask in plain English — e.g. "what do I need to lay a foundation?"'
+              className="w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isSearching || !searchQuery.trim()}
+            className="flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-700 disabled:opacity-50"
+          >
+            {isSearching ? (
+              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Searching…</>
+            ) : (
+              <>✦ AI Search</>
+            )}
+          </button>
+          {hasSearched && (
+            <button type="button" onClick={clearSearch} className="rounded-2xl border border-slate-200 px-4 py-3.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
+              Clear
+            </button>
+          )}
+        </form>
+        {hasSearched && (
+          <p className="mt-2 text-xs text-slate-500 pl-1">
+            {searchResults.length > 0
+              ? `${searchResults.length} item${searchResults.length !== 1 ? "s" : ""} matched for "${searchQuery}"`
+              : `No items matched "${searchQuery}" — try different keywords`}
+          </p>
+        )}
+      </section>
+
+      <section className="container mx-auto grid gap-8 px-4 pb-12 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="grid gap-6 md:grid-cols-2">
-          {mergedCategories.map((category) => (
+          {hasSearched ? (
+            searchResults.length === 0 ? (
+              <div className="md:col-span-2 rounded-3xl bg-white p-8 shadow-lg text-center">
+                <p className="text-slate-500 text-lg">No products matched your search.</p>
+                <p className="text-slate-400 text-sm mt-2">Try rephrasing — e.g. "tiles for flooring" or "PVC water pipes".</p>
+                <button onClick={clearSearch} className="mt-4 rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                  Back to full catalog
+                </button>
+              </div>
+            ) : (
+              searchResults.map((item) => (
+                <article key={item.id} className="rounded-3xl bg-white p-5 shadow-lg sm:p-6 border-2 border-violet-100">
+                  <span className="inline-block rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700 mb-3">
+                    {item.category}
+                  </span>
+                  {item.image_url && (
+                    <img src={item.image_url} alt={item.name} className="w-full h-36 object-contain bg-slate-50 rounded-xl mb-3" />
+                  )}
+                  <h2 className="text-lg font-semibold text-slate-900">{item.name}</h2>
+                  {item.description && (
+                    <p className="mt-1 text-sm text-slate-500">{item.description}</p>
+                  )}
+                  {(item.price || item.unit) && (
+                    <p className="mt-3 text-sm font-semibold text-blue-700">
+                      {item.price ? `KES ${Number(item.price).toLocaleString()}` : "Price on request"}
+                      {item.unit ? ` / ${item.unit}` : ""}
+                    </p>
+                  )}
+                </article>
+              ))
+            )
+          ) : (
+          mergedCategories.map((category) => (
             <article key={category.id} className="rounded-3xl bg-white p-5 shadow-lg sm:p-6">
               <h2 className="text-xl font-semibold text-slate-900 sm:text-2xl">
                 {category.title}
@@ -147,7 +247,8 @@ export default function HardwarePage() {
                 ))}
               </ul>
             </article>
-          ))}
+          ))
+          )}
         </div>
 
         <div className="space-y-6">

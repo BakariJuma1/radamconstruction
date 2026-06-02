@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from groq import Groq
 import os
+import json
+import re
 
 ai_bp = Blueprint("ai", __name__)
 
@@ -27,6 +29,15 @@ def _groq_client():
         return None
     return Groq(api_key=api_key)
 
+
+def _extract_json(text):
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if match:
+        return json.loads(match.group())
+    return None
+
+
+# ── Enhance description ────────────────────────────────────────────────────────
 
 @ai_bp.route("/ai/enhance-description", methods=["POST"])
 @jwt_required()
@@ -60,6 +71,8 @@ def enhance_description():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+# ── Chatbot context builder ────────────────────────────────────────────────────
 
 def _build_company_context():
     from server.models import Service, PortfolioItem, HardwareCategory
@@ -134,6 +147,8 @@ through the contact page.
 """
 
 
+# ── Public chatbot ─────────────────────────────────────────────────────────────
+
 @ai_bp.route("/ai/chat", methods=["POST"])
 def chat():
     data = request.get_json() or {}
@@ -151,7 +166,7 @@ def chat():
         system_prompt = CHAT_SYSTEM_TEMPLATE.format(context=context)
 
         groq_messages = [{"role": "system", "content": system_prompt}]
-        for msg in messages[-20:]:  # keep last 20 turns to stay within token limits
+        for msg in messages[-20:]:
             role = msg.get("role")
             content = msg.get("content", "").strip()
             if role in ("user", "assistant") and content:
@@ -165,5 +180,227 @@ def chat():
         )
         reply = completion.choices[0].message.content.strip()
         return jsonify({"reply": reply})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ── AI reply drafting ──────────────────────────────────────────────────────────
+
+@ai_bp.route("/ai/draft-reply", methods=["POST"])
+@jwt_required()
+def draft_reply():
+    data = request.get_json() or {}
+    item_type = data.get("type", "booking")
+    item = data.get("data", {})
+
+    name = item.get("name", "Customer")
+    email = item.get("email", "")
+    message = item.get("message", "")
+
+    if item_type == "booking":
+        service = (item.get("service") or {}).get("name", "General inquiry")
+        context_line = f"Service requested: {service}"
+    else:
+        subject = item.get("subject", "General inquiry")
+        context_line = f"Subject: {subject}"
+
+    prompt = f"""Write a professional, warm email reply from Radamjaribu Builders to this customer.
+
+Customer: {name}
+{context_line}
+Customer's message: {message}
+
+Format your response exactly like this (include the markers):
+SUBJECT: <concise email subject>
+BODY:
+<full email body — use proper salutation, address their specific request, and sign off as 'The Radamjaribu Builders Team'>"""
+
+    client = _groq_client()
+    if not client:
+        return jsonify({"error": "Groq API key not configured"}), 500
+
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a professional customer service email writer for Radamjaribu Builders, "
+                        "a construction company in Kenya. Write warm, professional, and personalised emails. "
+                        "Always address the customer by name. Never invent prices or timelines."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.5,
+            max_tokens=700,
+        )
+        text = completion.choices[0].message.content.strip()
+
+        subject = f"Re: Your inquiry – {name}"
+        body = text
+
+        if "SUBJECT:" in text and "BODY:" in text:
+            parts = text.split("BODY:", 1)
+            subject = parts[0].replace("SUBJECT:", "").strip()
+            body = parts[1].strip()
+
+        return jsonify({"subject": subject, "body": body, "to": email, "toName": name})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ── Send reply email via Resend ────────────────────────────────────────────────
+
+@ai_bp.route("/ai/send-reply", methods=["POST"])
+@jwt_required()
+def send_reply():
+    import resend
+
+    data = request.get_json() or {}
+    to_email = data.get("to", "")
+    subject = data.get("subject", "")
+    body = data.get("body", "")
+
+    if not to_email or not subject or not body:
+        return jsonify({"error": "to, subject, and body are required"}), 400
+
+    api_key = os.environ.get("RESEND_API_KEY")
+    from_email = os.environ.get("RESEND_FROM_EMAIL")
+
+    if not api_key or not from_email:
+        return jsonify({"error": "Email settings not configured"}), 500
+
+    resend.api_key = api_key
+    html_body = "<br>".join(body.splitlines())
+
+    try:
+        resend.Emails.send({
+            "from": from_email,
+            "to": [to_email],
+            "subject": subject,
+            "html": f"""
+                <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;color:#111827;line-height:1.7;">
+                    {html_body}
+                </div>
+            """,
+        })
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ── Booking triage ─────────────────────────────────────────────────────────────
+
+@ai_bp.route("/ai/triage-bookings", methods=["POST"])
+@jwt_required()
+def triage_bookings():
+    data = request.get_json() or {}
+    bookings = data.get("bookings", [])
+
+    if not bookings:
+        return jsonify({"results": []}), 200
+
+    client = _groq_client()
+    if not client:
+        return jsonify({"error": "Groq API key not configured"}), 500
+
+    booking_lines = []
+    for b in bookings:
+        service = (b.get("service") or {}).get("name", "General")
+        msg = (b.get("message") or "")[:150]
+        booking_lines.append(f'ID:{b["id"]} | {b.get("name","?")} | Service:{service} | "{msg}"')
+
+    prompt = f"""Triage these construction company booking inquiries. Assign a priority and a short label.
+
+{chr(10).join(booking_lines)}
+
+Return ONLY valid JSON:
+{{"results":[{{"id":<id>,"priority":"urgent|normal|low","label":"<max 8 word action summary>"}}]}}
+
+Priority:
+- urgent: time-sensitive, emergency, clear deadline
+- normal: standard project inquiry
+- low: vague or general info request"""
+
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=600,
+        )
+        result = _extract_json(completion.choices[0].message.content)
+        return jsonify(result or {"results": []})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ── AI hardware search ─────────────────────────────────────────────────────────
+
+@ai_bp.route("/ai/hardware-search", methods=["POST"])
+def hardware_search():
+    data = request.get_json() or {}
+    query = (data.get("query") or "").strip()
+
+    if not query:
+        return jsonify({"error": "query is required"}), 400
+
+    client = _groq_client()
+    if not client:
+        return jsonify({"error": "Groq API key not configured"}), 500
+
+    from server.models import HardwareCategory
+    categories = HardwareCategory.query.all()
+
+    if not categories:
+        return jsonify({"results": []}), 200
+
+    items_by_id = {}
+    catalog_compact = []
+    for cat in categories:
+        for item in cat.items:
+            items_by_id[item.id] = {
+                "id": item.id,
+                "name": item.name,
+                "description": item.description or "",
+                "category": cat.name,
+                "price": item.price,
+                "unit": item.unit,
+                "image_url": item.image_url,
+            }
+            catalog_compact.append({
+                "id": item.id,
+                "name": item.name,
+                "description": item.description or "",
+                "category": cat.name,
+            })
+
+    prompt = f"""You are a hardware catalog assistant for a Kenya construction company.
+Given the catalog below, find items that best match the customer query.
+
+CATALOG: {json.dumps(catalog_compact)}
+
+QUERY: "{query}"
+
+Return ONLY valid JSON with up to 8 most relevant item IDs ordered by relevance:
+{{"ids":[id1,id2,...]}}"""
+
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=200,
+        )
+        result = _extract_json(completion.choices[0].message.content)
+        matched_ids = result.get("ids", []) if result else []
+
+        id_order = {id_: idx for idx, id_ in enumerate(matched_ids)}
+        matched = [items_by_id[i] for i in matched_ids if i in items_by_id]
+        matched.sort(key=lambda x: id_order.get(x["id"], 999))
+
+        return jsonify({"results": matched})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
