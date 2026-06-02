@@ -686,6 +686,7 @@ const AdminDashboard = () => {
       description: service.description || "",
       price: service.price || "",
       images: [],
+      alt_text: service.alt_text || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

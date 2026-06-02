@@ -269,8 +269,12 @@ def send_reply():
     api_key = os.environ.get("RESEND_API_KEY")
     from_email = os.environ.get("RESEND_FROM_EMAIL")
 
-    if not api_key or not from_email:
-        return jsonify({"error": "Email settings not configured"}), 500
+    if not api_key:
+        print("ERROR: RESEND_API_KEY environment variable is not set")
+        return jsonify({"error": "Email settings not configured: RESEND_API_KEY missing"}), 500
+    if not from_email:
+        print("ERROR: RESEND_FROM_EMAIL environment variable is not set")
+        return jsonify({"error": "Email settings not configured: RESEND_FROM_EMAIL missing"}), 500
 
     resend.api_key = api_key
     html_body = "<br>".join(body.splitlines())

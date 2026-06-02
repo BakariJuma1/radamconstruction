@@ -5,3 +5,22 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn wsgi:app"
     preDeployCommand: "python run_migrations.py"
+    envVars:
+      - key: FLASK_SQLALCHEMY_DATABASE_URI
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false

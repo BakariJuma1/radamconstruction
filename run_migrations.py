@@ -1,8 +1,13 @@
+import sys
 from flask_migrate import upgrade
 from server.app import create_app
-from server.extension import db
 
 app = create_app()
 
 with app.app_context():
-    upgrade()
+    try:
+        upgrade()
+        print("Database migrations applied successfully.")
+    except Exception as e:
+        print(f"ERROR: Database migration failed: {e}", file=sys.stderr)
+        sys.exit(1)
