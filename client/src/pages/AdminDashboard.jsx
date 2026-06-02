@@ -59,6 +59,28 @@ const AdminDashboard = () => {
     password: "",
   });
   const [editingTeamMemberId, setEditingTeamMemberId] = useState(null);
+  const [aiLoading, setAiLoading] = useState("");
+
+  const enhanceDescription = async (text, type, setter, field) => {
+    if (!text.trim()) {
+      showMessage("Write a short description first, then enhance it.", "error");
+      return;
+    }
+    setAiLoading(type);
+    try {
+      const res = await axios.post(
+        "https://radamconstruction.onrender.com/ai/enhance-description",
+        { text, type },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setter((prev) => ({ ...prev, [field]: res.data.enhanced }));
+    } catch (err) {
+      showMessage("AI enhancement failed. Please try again.", "error");
+    } finally {
+      setAiLoading("");
+    }
+  };
+
   const [bookingFilters, setBookingFilters] = useState({
     search: "",
     status: "all",
@@ -1568,12 +1590,26 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div>
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Description
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label
+                        htmlFor="description"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Description
+                      </label>
+                      <button
+                        type="button"
+                        disabled={aiLoading === "service"}
+                        onClick={() => enhanceDescription(newService.description, "service", setNewService, "description")}
+                        className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-50"
+                      >
+                        {aiLoading === "service" ? (
+                          <><div className="w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />Enhancing...</>
+                        ) : (
+                          <>✦ Enhance with AI</>
+                        )}
+                      </button>
+                    </div>
                     <textarea
                       id="description"
                       rows={4}
@@ -1585,7 +1621,7 @@ const AdminDashboard = () => {
                         })
                       }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 resize-vertical"
-                      placeholder="Describe the service..."
+                      placeholder="Describe the service in plain English — AI will enhance it..."
                       required
                     />
                   </div>
@@ -1813,12 +1849,26 @@ const AdminDashboard = () => {
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor="portfolio-description"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Description
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label
+                        htmlFor="portfolio-description"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Description
+                      </label>
+                      <button
+                        type="button"
+                        disabled={aiLoading === "portfolio"}
+                        onClick={() => enhanceDescription(newPortfolio.description, "portfolio", setNewPortfolio, "description")}
+                        className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-50"
+                      >
+                        {aiLoading === "portfolio" ? (
+                          <><div className="w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />Enhancing...</>
+                        ) : (
+                          <>✦ Enhance with AI</>
+                        )}
+                      </button>
+                    </div>
                     <textarea
                       id="portfolio-description"
                       rows={4}
@@ -1830,7 +1880,7 @@ const AdminDashboard = () => {
                         })
                       }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 resize-vertical"
-                      placeholder="Describe your portfolio item..."
+                      placeholder="Describe the project in plain English — AI will enhance it..."
                       required
                     />
                   </div>
@@ -2229,18 +2279,32 @@ const AdminDashboard = () => {
                       placeholder="Category name"
                       required
                     />
-                    <textarea
-                      rows={4}
-                      value={newHardwareCategory.description}
-                      onChange={(e) =>
-                        setNewHardwareCategory({
-                          ...newHardwareCategory,
-                          description: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg"
-                      placeholder="Optional category description"
-                    />
+                    <div className="relative">
+                      <textarea
+                        rows={4}
+                        value={newHardwareCategory.description}
+                        onChange={(e) =>
+                          setNewHardwareCategory({
+                            ...newHardwareCategory,
+                            description: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                        placeholder="Optional category description — AI can enhance it..."
+                      />
+                      <button
+                        type="button"
+                        disabled={aiLoading === "hardware_category"}
+                        onClick={() => enhanceDescription(newHardwareCategory.description, "hardware_category", setNewHardwareCategory, "description")}
+                        className="mt-1 flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-50"
+                      >
+                        {aiLoading === "hardware_category" ? (
+                          <><div className="w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />Enhancing...</>
+                        ) : (
+                          <>✦ Enhance with AI</>
+                        )}
+                      </button>
+                    </div>
                     <button
                       type="submit"
                       disabled={loading}
@@ -2322,18 +2386,32 @@ const AdminDashboard = () => {
                         placeholder="Unit e.g. bag, piece"
                       />
                     </div>
-                    <textarea
-                      rows={4}
-                      value={newHardwareItem.description}
-                      onChange={(e) =>
-                        setNewHardwareItem({
-                          ...newHardwareItem,
-                          description: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg"
-                      placeholder="Optional item description"
-                    />
+                    <div className="relative">
+                      <textarea
+                        rows={4}
+                        value={newHardwareItem.description}
+                        onChange={(e) =>
+                          setNewHardwareItem({
+                            ...newHardwareItem,
+                            description: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                        placeholder="Optional item description — AI can enhance it..."
+                      />
+                      <button
+                        type="button"
+                        disabled={aiLoading === "hardware_item"}
+                        onClick={() => enhanceDescription(newHardwareItem.description, "hardware_item", setNewHardwareItem, "description")}
+                        className="mt-1 flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-50"
+                      >
+                        {aiLoading === "hardware_item" ? (
+                          <><div className="w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />Enhancing...</>
+                        ) : (
+                          <>✦ Enhance with AI</>
+                        )}
+                      </button>
+                    </div>
                     <div>
                       <label
                         htmlFor="hardware-item-image"

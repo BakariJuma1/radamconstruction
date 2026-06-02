@@ -347,6 +347,7 @@ export default function HomePage() {
                     {project.image_url ? (
                       <img
                         src={project.image_url}
+                    
                         alt={project.title || project.tittle}
                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                       />

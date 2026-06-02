@@ -6,6 +6,7 @@ from server.controllers.contact import contact_bp
 from server.controllers.settings import settings_bp
 from server.controllers.hardware import hardware_bp
 from server.controllers.users import users_bp
+from server.controllers.ai import ai_bp
 
 
 def register_routes(app):
@@ -17,3 +18,4 @@ def register_routes(app):
     app.register_blueprint(settings_bp)
     app.register_blueprint(hardware_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(ai_bp)
