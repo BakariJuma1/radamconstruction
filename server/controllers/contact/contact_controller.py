@@ -3,7 +3,7 @@ from flask_restful import Resource, Api
 from flask_jwt_extended import jwt_required
 from server.extension import db
 from server.models import Contact
-from server.service.notification_service import send_new_contact_notification
+from server.service.notification_service import send_new_contact_notification, send_contact_acknowledgement
 from . import contact_bp
 
 api = Api(contact_bp)
@@ -35,6 +35,13 @@ class ContactListResource(Resource):
             print(f"Contact notification skipped: {error}")
         except Exception as error:
             print(f"Contact notification failed: {error}")
+
+        try:
+            send_contact_acknowledgement(contact)
+        except RuntimeError as error:
+            print(f"Contact acknowledgement skipped: {error}")
+        except Exception as error:
+            print(f"Contact acknowledgement failed: {error}")
 
         return contact.to_dict(), 201
 

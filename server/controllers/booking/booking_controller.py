@@ -3,7 +3,7 @@ from flask_restful import Resource,Api
 from flask_jwt_extended import jwt_required
 from server.extension import db
 from server.models import Service, Booking, User
-from server.service.notification_service import send_new_booking_notification
+from server.service.notification_service import send_new_booking_notification, send_booking_acknowledgement
 from . import booking_bp
 
 api = Api(booking_bp)
@@ -34,6 +34,13 @@ class BookingListResource(Resource):
             print(f"Booking notification skipped: {error}")
         except Exception as error:
             print(f"Booking notification failed: {error}")
+
+        try:
+            send_booking_acknowledgement(booking)
+        except RuntimeError as error:
+            print(f"Booking acknowledgement skipped: {error}")
+        except Exception as error:
+            print(f"Booking acknowledgement failed: {error}")
 
         return booking.to_dict(rules=("-service.bookings",)), 201
 
