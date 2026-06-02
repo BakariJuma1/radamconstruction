@@ -26,6 +26,7 @@ class ServiceListResource(Resource):
         name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
+        alt_text = request.form.get("alt_text", "").strip() or None
         files = request.files.getlist("images")
 
         if not name:
@@ -41,7 +42,8 @@ class ServiceListResource(Resource):
             name=name.strip(),
             description=description,
             price=price,
-            image_url=image_url
+            image_url=image_url,
+            alt_text=alt_text,
         )
         db.session.add(service)
         db.session.commit()
@@ -63,6 +65,7 @@ class ServiceResource(Resource):
         name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
+        alt_text = request.form.get("alt_text", "").strip() or None
         files = request.files.getlist("images")
 
         if name:
@@ -71,6 +74,7 @@ class ServiceResource(Resource):
             service.description = description
         if price:
             service.price = price
+        service.alt_text = alt_text
 
         if files:
             uploaded = upload_files_to_cloudinary(files, folder="radam-construction/services")

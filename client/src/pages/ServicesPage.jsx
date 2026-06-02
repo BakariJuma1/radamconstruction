@@ -169,7 +169,7 @@ const ServicesPage = () => {
                       <>
                         <img
                           src={service.image_url}
-                          alt={service.name}
+                          alt={service.alt_text || service.name}
                           className="w-full h-full object-cover"
                           onError={handleImageError}
                           onLoad={handleImageLoad}

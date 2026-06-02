@@ -10,6 +10,7 @@ class PortfolioItem(db.Model,SerializerMixin):
     tittle = db.Column(db.String,nullable=False)
     description = db.Column(db.String,nullable=False)
     image_url= db.Column(db.String,nullable=False)
+    alt_text = db.Column(db.String,nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     serialize_rules = ("-images.portfolio",)

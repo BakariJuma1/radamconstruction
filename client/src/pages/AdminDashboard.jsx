@@ -29,6 +29,7 @@ const AdminDashboard = () => {
     description: "",
     price: "",
     images: [],
+    alt_text: "",
   });
   const [editingServiceId, setEditingServiceId] = useState(null);
   const [serviceImagePreview, setServiceImagePreview] = useState("");
@@ -38,7 +39,9 @@ const AdminDashboard = () => {
     title: "",
     description: "",
     images: [],
+    alt_text: "",
   });
+  const [seoLoading, setSeoLoading] = useState("");
   const [newHardwareCategory, setNewHardwareCategory] = useState({
     name: "",
     description: "",
@@ -81,6 +84,27 @@ const AdminDashboard = () => {
       showMessage("AI enhancement failed. Please try again.", "error");
     } finally {
       setAiLoading("");
+    }
+  };
+
+  const generateSeo = async (title, description, type, setter) => {
+    if (!title.trim()) {
+      showMessage("Enter a title first before generating SEO content.", "error");
+      return;
+    }
+    setSeoLoading(type);
+    try {
+      const res = await axios.post(
+        "https://radamconstruction.onrender.com/ai/generate-seo",
+        { title, description, type },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setter((prev) => ({ ...prev, alt_text: res.data.alt_text || "" }));
+      showMessage("SEO content generated — review and save.", "success");
+    } catch {
+      showMessage("Failed to generate SEO content. Try again.", "error");
+    } finally {
+      setSeoLoading("");
     }
   };
 
@@ -340,7 +364,7 @@ const AdminDashboard = () => {
   }, [bookings]);
 
   const resetServiceForm = () => {
-    setNewService({ title: "", description: "", price: "", images: [] });
+    setNewService({ title: "", description: "", price: "", images: [], alt_text: "" });
     setServiceImagePreview("");
     setEditingServiceId(null);
   };
@@ -359,7 +383,9 @@ const AdminDashboard = () => {
       if (newService.price) {
         formData.append("price", parseFloat(newService.price));
       }
-
+      if (newService.alt_text) {
+        formData.append("alt_text", newService.alt_text);
+      }
       newService.images.forEach((image) => {
         formData.append("images", image);
       });
@@ -417,7 +443,9 @@ const AdminDashboard = () => {
       const formData = new FormData();
       formData.append("title", newPortfolio.title);
       formData.append("description", newPortfolio.description);
-
+      if (newPortfolio.alt_text) {
+        formData.append("alt_text", newPortfolio.alt_text);
+      }
       newPortfolio.images.forEach((image) => {
         formData.append("images", image);
       });
@@ -436,7 +464,7 @@ const AdminDashboard = () => {
       });
 
       showMessage("Portfolio item created successfully", "success");
-      setNewPortfolio({ title: "", description: "", images: [] });
+      setNewPortfolio({ title: "", description: "", images: [], alt_text: "" });
 
       const portfolioRes = await axios.get(
         "https://radamconstruction.onrender.com/portfolio"
@@ -1718,6 +1746,35 @@ const AdminDashboard = () => {
                     />
                   </div>
                   <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Image Alt Text
+                        <span className="ml-1 text-xs font-normal text-gray-400">(SEO)</span>
+                      </label>
+                      <button
+                        type="button"
+                        disabled={seoLoading === "service"}
+                        onClick={() => generateSeo(newService.title, newService.description, "service", setNewService)}
+                        className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                      >
+                        {seoLoading === "service" ? (
+                          <><div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />Generating…</>
+                        ) : <>✦ Generate SEO</>}
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={newService.alt_text}
+                      onChange={(e) => setNewService({ ...newService, alt_text: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="Descriptive text for the image — improves Google visibility"
+                      maxLength={125}
+                    />
+                    {newService.alt_text && (
+                      <p className="text-xs text-gray-400 mt-1 text-right">{newService.alt_text.length}/125 characters</p>
+                    )}
+                  </div>
+                  <div>
                     <label
                       htmlFor="service-images"
                       className="block text-sm font-medium text-gray-700 mb-2"
@@ -1975,6 +2032,35 @@ const AdminDashboard = () => {
                       placeholder="Describe the project in plain English — AI will enhance it..."
                       required
                     />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Image Alt Text
+                        <span className="ml-1 text-xs font-normal text-gray-400">(SEO)</span>
+                      </label>
+                      <button
+                        type="button"
+                        disabled={seoLoading === "portfolio"}
+                        onClick={() => generateSeo(newPortfolio.title, newPortfolio.description, "portfolio", setNewPortfolio)}
+                        className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                      >
+                        {seoLoading === "portfolio" ? (
+                          <><div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />Generating…</>
+                        ) : <>✦ Generate SEO</>}
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={newPortfolio.alt_text}
+                      onChange={(e) => setNewPortfolio({ ...newPortfolio, alt_text: e.target.value })}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="Descriptive text for the image — improves Google visibility"
+                      maxLength={125}
+                    />
+                    {newPortfolio.alt_text && (
+                      <p className="text-xs text-gray-400 mt-1 text-right">{newPortfolio.alt_text.length}/125 characters</p>
+                    )}
                   </div>
                   <div>
                     <label

@@ -337,6 +337,55 @@ Priority:
         return jsonify({"error": str(e)}), 500
 
 
+# ── SEO alt-text + meta description generator ─────────────────────────────────
+
+@ai_bp.route("/ai/generate-seo", methods=["POST"])
+@jwt_required()
+def generate_seo():
+    data = request.get_json() or {}
+    title = (data.get("title") or "").strip()
+    description = (data.get("description") or "").strip()
+    content_type = data.get("type", "service")  # "service" | "portfolio"
+
+    if not title:
+        return jsonify({"error": "title is required"}), 400
+
+    client = _groq_client()
+    if not client:
+        return jsonify({"error": "Groq API key not configured"}), 500
+
+    type_label = "construction service" if content_type == "service" else "completed construction project"
+
+    prompt = f"""Generate SEO content for a {type_label} by Radamjaribu Builders, a professional construction company in Kenya.
+
+Title: {title}
+Description: {description or "Not provided"}
+
+Return ONLY valid JSON in this exact format:
+{{
+  "alt_text": "<descriptive image alt text, under 120 characters, include relevant keywords and Kenya context>",
+  "meta_description": "<SEO meta description, 145-160 characters, compelling and keyword-rich, include a call to action>"
+}}
+
+Rules:
+- alt_text: describe what someone would see in the image, include the service/project type and 'Kenya' or 'Nairobi'
+- meta_description: written for search results, include the company name 'Radamjaribu Builders', relevant keywords, and end with a soft CTA"""
+
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.4,
+            max_tokens=300,
+        )
+        result = _extract_json(completion.choices[0].message.content)
+        if not result:
+            return jsonify({"error": "Failed to parse SEO content"}), 500
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # ── AI hardware search ─────────────────────────────────────────────────────────
 
 @ai_bp.route("/ai/hardware-search", methods=["POST"])

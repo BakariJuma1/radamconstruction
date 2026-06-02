@@ -206,7 +206,7 @@ const PortfolioPage = () => {
                       <>
                         <ImageWithFallback
                           src={project.allImages[cardImageIndexes[project.id] || 0]}
-                          alt={project.title}
+                          alt={project.alt_text || project.title}
                           className="w-full h-full object-cover"
                         />
                         {project.allImages.length > 1 && (

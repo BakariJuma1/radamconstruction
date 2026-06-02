@@ -18,7 +18,8 @@ class PortfolioListResource(Resource):
     def post(self):
         tittle = request.form.get("title")
         description = request.form.get("description")
-        files = request.files.getlist("images") 
+        alt_text = request.form.get("alt_text", "").strip() or None
+        files = request.files.getlist("images")
 
         if not files:
             return {"error": "At least one image is required"}, 400
@@ -26,11 +27,12 @@ class PortfolioListResource(Resource):
         # Upload all images
         uploaded = upload_files_to_cloudinary(files, folder="radam-construction/portfolio")
 
-        # First image becomes the cover 
+        # First image becomes the cover
         portfolio = PortfolioItem(
             tittle=tittle,
             description=description,
-            image_url=uploaded[0]["secure_url"]  
+            image_url=uploaded[0]["secure_url"],
+            alt_text=alt_text,
         )
         db.session.add(portfolio)
         db.session.flush()
@@ -53,12 +55,14 @@ class PortfolioResource(Resource):
         item = PortfolioItem.query.get_or_404(portfolio_id)
         tittle = request.form.get("title")
         description = request.form.get("description")
+        alt_text = request.form.get("alt_text", "").strip() or None
         files = request.files.getlist("images")
 
         if tittle:
             item.tittle = tittle
         if description:
             item.description = description
+        item.alt_text = alt_text
 
         if files:
             
