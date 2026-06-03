@@ -2849,77 +2849,74 @@ const AdminDashboard = () => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-full flex-col overflow-y-auto">
-          {/* Sidebar header */}
-          <div className="bg-slate-900 px-5 py-5 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+        {/* flex-col with h-full; only the nav scrolls */}
+        <div className="flex h-full flex-col">
+          {/* Sidebar header — shrink-0 so it never scrolls away */}
+          <div className="shrink-0 bg-slate-900 px-4 py-4 text-white">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-400">
                   Radamjaribu Builders
                 </p>
-                <h1 className="mt-1 text-lg font-bold">Admin Dashboard</h1>
+                <h1 className="mt-0.5 text-base font-bold leading-tight">Admin</h1>
               </div>
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className="md:hidden flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20"
+                className="md:hidden flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20"
                 aria-label="Close menu"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             {user && (
-              <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-sm font-bold text-white">
-                    {user.name?.[0] || user.email?.[0] || "A"}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-white">{user.name || "Administrator"}</p>
-                    <p className="truncate text-xs text-slate-400">{user.email}</p>
-                  </div>
+              <div className="mt-3 flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-2">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/15 text-xs font-bold text-white">
+                  {user.name?.[0] || user.email?.[0] || "A"}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-semibold text-white">{user.name || "Administrator"}</p>
+                  <p className="truncate text-[10px] text-slate-400">{user.email}</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Nav */}
-          <nav className="flex-1 p-3">
-            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+          {/* Nav — flex-1 + min-h-0 + overflow-y-auto = scrollable middle section */}
+          <nav className="min-h-0 flex-1 overflow-y-auto p-2.5">
+            <p className="mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-400">
               Navigation
             </p>
             {navTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id); setIsSidebarOpen(false); }}
-                className={`mb-1 flex w-full items-center rounded-xl px-3 py-3 text-left transition-all duration-200 ${
+                className={`mb-0.5 flex w-full items-center rounded-lg px-2.5 py-2.5 text-left transition-all duration-150 ${
                   activeTab === tab.id
                     ? "bg-slate-900 text-white shadow-sm"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
-                <span
-                  className={`mr-3 h-8 w-1 shrink-0 rounded-full ${
-                    activeTab === tab.id ? `bg-gradient-to-b ${tab.tone}` : "bg-slate-200"
-                  }`}
-                />
+                <span className={`mr-2.5 h-6 w-0.5 shrink-0 rounded-full ${
+                  activeTab === tab.id ? `bg-gradient-to-b ${tab.tone}` : "bg-slate-200"
+                }`} />
                 <div className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">{tab.label}</span>
-                  <span className={`block truncate text-xs ${activeTab === tab.id ? "text-slate-300" : "text-slate-400"}`}>
-                    {tab.id === "bookings" && `${unreadBookingsCount} new / ${bookings.length} total`}
-                    {tab.id === "contacts" && `${unreadContactsCount} new / ${contacts.length} total`}
+                  <span className="block text-sm font-semibold leading-tight">{tab.label}</span>
+                  <span className={`block truncate text-[10px] ${activeTab === tab.id ? "text-slate-300" : "text-slate-400"}`}>
+                    {tab.id === "bookings" && `${unreadBookingsCount} new · ${bookings.length} total`}
+                    {tab.id === "contacts" && `${unreadContactsCount} new · ${contacts.length} total`}
                     {tab.id === "services" && `${services.length} services`}
                     {tab.id === "portfolio" && `${portfolio.length} projects`}
                     {tab.id === "hardware" && `${hardwareCategories.length} categories`}
                     {tab.id === "team" && `${teamMembers.length} members`}
-                    {tab.id === "settings" && "Platform controls"}
+                    {tab.id === "settings" && "Controls"}
                   </span>
                 </div>
                 {((tab.id === "bookings" && unreadBookingsCount > 0) ||
                   (tab.id === "contacts" && unreadContactsCount > 0)) && (
-                  <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    activeTab === tab.id ? "bg-white/10 text-white" : "bg-sky-100 text-sky-700"
+                  <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                    activeTab === tab.id ? "bg-white/15 text-white" : "bg-sky-100 text-sky-700"
                   }`}>
                     {tab.id === "bookings" ? unreadBookingsCount : unreadContactsCount}
                   </span>
@@ -2928,13 +2925,13 @@ const AdminDashboard = () => {
             ))}
           </nav>
 
-          {/* Logout */}
-          <div className="border-t border-slate-100 p-3">
+          {/* Logout — shrink-0 so it stays pinned at the bottom */}
+          <div className="shrink-0 border-t border-slate-100 p-2.5">
             <button
               onClick={logout}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-rose-600 transition-colors hover:bg-rose-50"
+              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-rose-600 transition-colors hover:bg-rose-50"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
               <span className="text-sm font-semibold">Logout</span>

@@ -21,8 +21,8 @@ function App() {
 
   return (
     <>
-      <Navbar />
-      <div className="pt-[76px] lg:pt-[112px]">
+      {isAdminRoute ? null : <Navbar />}
+      <div className={isAdminRoute ? "" : "pt-[76px] lg:pt-[112px]"}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/services" element={<ServicesPage />} />
