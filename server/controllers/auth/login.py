@@ -1,8 +1,8 @@
 from flask_restful import Resource,Api
 from flask import request
 from server.models.user import User
-from server.extension import db 
-from flask_jwt_extended import create_access_token
+from server.extension import db
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from server.service.password_reset_service import (
     generate_reset_token,
     verify_reset_token,
@@ -46,12 +46,19 @@ class ForgotPassword(Resource):
 
         user = User.query.filter_by(email=email).first()
         if user:
-            frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+            # Prefer explicit env var; fall back to request origin so the
+            # link works even if FRONTEND_URL is not yet set on Render.
+            frontend_url = (
+                os.getenv("FRONTEND_URL")
+                or request.headers.get("Origin")
+                or "https://radamconstruction.vercel.app"
+            ).rstrip("/")
             token = generate_reset_token(user.email)
             reset_url = f"{frontend_url}/reset-password?token={token}"
             try:
                 send_password_reset_email(user.email, reset_url)
             except RuntimeError as error:
+                print(f"ERROR: password reset email failed for {email}: {error}")
                 return {"error": str(error)}, 500
 
         return {
@@ -89,6 +96,38 @@ class ResetPassword(Resource):
 
         return {"message": "Password reset successfully"}, 200
         
+class ChangePassword(Resource):
+    @jwt_required()
+    def post(self):
+        current_user_id = get_jwt_identity()
+        user = User.query.get_or_404(current_user_id)
+
+        data = request.get_json() or {}
+        current_password = data.get("current_password") or ""
+        new_password = data.get("new_password") or ""
+        confirm_password = data.get("confirm_password") or ""
+
+        if not current_password or not new_password or not confirm_password:
+            return {"error": "All fields are required"}, 400
+
+        if not user.check_password(current_password):
+            return {"error": "Current password is incorrect"}, 400
+
+        if new_password != confirm_password:
+            return {"error": "New passwords do not match"}, 400
+
+        if len(new_password) < 8:
+            return {"error": "New password must be at least 8 characters"}, 400
+
+        if new_password == current_password:
+            return {"error": "New password must be different from your current password"}, 400
+
+        user.set_password(new_password)
+        db.session.commit()
+        return {"message": "Password changed successfully"}, 200
+
+
 api.add_resource(Login,'/login')
 api.add_resource(ForgotPassword, '/forgot-password')
 api.add_resource(ResetPassword, '/reset-password')
+api.add_resource(ChangePassword, '/change-password')

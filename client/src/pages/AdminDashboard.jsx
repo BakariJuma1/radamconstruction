@@ -64,6 +64,8 @@ const AdminDashboard = () => {
   const [editingTeamMemberId, setEditingTeamMemberId] = useState(null);
   const [aiLoading, setAiLoading] = useState("");
   const [replyDraft, setReplyDraft] = useState({ open: false, generating: false, sending: false, to: "", toName: "", subject: "", body: "", sent: false });
+  const [changePassword, setChangePassword] = useState({ current_password: "", new_password: "", confirm_password: "" });
+  const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [triageData, setTriageData] = useState({});
   const [triageLoading, setTriageLoading] = useState(false);
 
@@ -855,6 +857,25 @@ const AdminDashboard = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!validateAuth()) return;
+    setChangePasswordLoading(true);
+    try {
+      await axios.post(
+        "https://radamconstruction.onrender.com/change-password",
+        changePassword,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setChangePassword({ current_password: "", new_password: "", confirm_password: "" });
+      showMessage("Password changed successfully", "success");
+    } catch (error) {
+      showMessage(error.response?.data?.error || "Failed to change password", "error");
+    } finally {
+      setChangePasswordLoading(false);
     }
   };
 
@@ -2276,6 +2297,69 @@ const AdminDashboard = () => {
                     className="w-full sm:w-auto bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
                     Save Settings
+                  </button>
+                </form>
+              </div>
+
+              {/* Change Password */}
+              <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-1">Change Your Password</h3>
+                <p className="text-sm text-gray-500 mb-5">
+                  Logged in as <span className="font-medium text-gray-700">{user?.email}</span>
+                </p>
+                <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Current password
+                    </label>
+                    <input
+                      type="password"
+                      value={changePassword.current_password}
+                      onChange={(e) => setChangePassword({ ...changePassword, current_password: e.target.value })}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                      placeholder="Enter your current password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      New password
+                    </label>
+                    <input
+                      type="password"
+                      value={changePassword.new_password}
+                      onChange={(e) => setChangePassword({ ...changePassword, new_password: e.target.value })}
+                      required
+                      minLength={8}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                      placeholder="At least 8 characters"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm new password
+                    </label>
+                    <input
+                      type="password"
+                      value={changePassword.confirm_password}
+                      onChange={(e) => setChangePassword({ ...changePassword, confirm_password: e.target.value })}
+                      required
+                      minLength={8}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                      placeholder="Repeat new password"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={changePasswordLoading}
+                    className="w-full sm:w-auto bg-slate-900 text-white py-3 px-6 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  >
+                    {changePasswordLoading ? (
+                      <span className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Changing…
+                      </span>
+                    ) : "Change password"}
                   </button>
                 </form>
               </div>
