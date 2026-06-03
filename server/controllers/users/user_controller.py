@@ -47,6 +47,7 @@ class UserListResource(Resource):
 class UserResource(Resource):
     @jwt_required()
     def put(self, user_id):
+        current_user_id = get_jwt_identity()
         user = User.query.get_or_404(user_id)
         data = request.get_json() or {}
 
@@ -67,6 +68,8 @@ class UserResource(Resource):
         user.email = email
 
         if password:
+            if current_user_id != user_id:
+                return {"error": "You can only change your own password"}, 403
             if len(password) < 8:
                 return {"error": "Password must be at least 8 characters"}, 400
             user.set_password(password)

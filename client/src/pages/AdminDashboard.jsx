@@ -66,6 +66,7 @@ const AdminDashboard = () => {
   const [replyDraft, setReplyDraft] = useState({ open: false, generating: false, sending: false, to: "", toName: "", subject: "", body: "", sent: false });
   const [changePassword, setChangePassword] = useState({ current_password: "", new_password: "", confirm_password: "" });
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
+  const [showTeamPassword, setShowTeamPassword] = useState(false);
   const [triageData, setTriageData] = useState({});
   const [triageLoading, setTriageLoading] = useState(false);
 
@@ -890,12 +891,9 @@ const AdminDashboard = () => {
   };
 
   const resetTeamMemberForm = () => {
-    setNewTeamMember({
-      username: "",
-      email: "",
-      password: "",
-    });
+    setNewTeamMember({ username: "", email: "", password: "" });
     setEditingTeamMemberId(null);
+    setShowTeamPassword(false);
   };
 
   const handleTeamMemberSubmit = async (e) => {
@@ -938,11 +936,8 @@ const AdminDashboard = () => {
 
   const startTeamMemberEdit = (member) => {
     setEditingTeamMemberId(member.id);
-    setNewTeamMember({
-      username: member.username || "",
-      email: member.email || "",
-      password: "",
-    });
+    setNewTeamMember({ username: member.username || "", email: member.email || "", password: "" });
+    setShowTeamPassword(false);
   };
 
   // Status badge component
@@ -2423,37 +2418,40 @@ const AdminDashboard = () => {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label
-                      htmlFor="team-password"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      {editingTeamMemberId ? "New Password" : "Password"}
-                    </label>
-                    <input
-                      id="team-password"
-                      type="password"
-                      value={newTeamMember.password}
-                      onChange={(e) =>
-                        setNewTeamMember({
-                          ...newTeamMember,
-                          password: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={
-                        editingTeamMemberId
-                          ? "Leave blank to keep current password"
-                          : "Minimum 8 characters"
-                      }
-                      required={!editingTeamMemberId}
-                    />
-                    {editingTeamMemberId ? (
-                      <p className="text-xs text-gray-500 mt-2">
-                        Leave this blank if you only want to update the name or email.
-                      </p>
-                    ) : null}
-                  </div>
+                  {/* Password — shown when adding a new member, or when editing your own record */}
+                  {(!editingTeamMemberId || editingTeamMemberId === user?.id) && (
+                    <div>
+                      <label
+                        htmlFor="team-password"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        {editingTeamMemberId ? "New Password" : "Password"}
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="team-password"
+                          type={showTeamPassword ? "text" : "password"}
+                          value={newTeamMember.password}
+                          onChange={(e) => setNewTeamMember({ ...newTeamMember, password: e.target.value })}
+                          className="w-full px-4 py-3 pr-20 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={editingTeamMemberId ? "Leave blank to keep current password" : "Minimum 8 characters"}
+                          required={!editingTeamMemberId}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowTeamPassword((v) => !v)}
+                          className="absolute inset-y-0 right-0 px-4 text-sm font-medium text-blue-600 hover:text-blue-700"
+                        >
+                          {showTeamPassword ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                      {editingTeamMemberId && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          Leave blank to keep your current password.
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       type="submit"
@@ -2490,9 +2488,16 @@ const AdminDashboard = () => {
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <h4 className="text-lg font-semibold text-gray-900">
-                              {member.username}
-                            </h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-lg font-semibold text-gray-900">
+                                {member.username}
+                              </h4>
+                              {member.id === user?.id && (
+                                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                                  You
+                                </span>
+                              )}
+                            </div>
                             <p className="text-sm text-gray-600 mt-1">
                               {member.email}
                             </p>

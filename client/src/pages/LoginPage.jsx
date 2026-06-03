@@ -37,7 +37,7 @@ export default function LoginPage() {
       const token = response.data.access_token
 
       // Call the context login to store user/token
-      login({ email: credentials.email }, token)
+      login({ id: response.data.user, email: response.data.email, name: response.data.name }, token)
 
       // Redirect to dashboard
       navigate('/admin/dashboard')
