@@ -56,12 +56,7 @@ _ACK_HEADER = """
 _ACK_FOOTER = """
     <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;
                 color:#6b7280;font-size:12px;">
-      <p style="margin:0;">
-        Radamjaribu Builders &mdash;
-        <a href="https://radamconstruction.vercel.app" style="color:#6b7280;">
-          radamconstruction.vercel.app
-        </a>
-      </p>
+      <p style="margin:0;">Radamjaribu Builders</p>
       <p style="margin:4px 0 0;">
         This is an automated acknowledgement. Please do not reply to this email.
       </p>
