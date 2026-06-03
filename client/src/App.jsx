@@ -12,6 +12,7 @@ import HardwarePage from "./pages/HardwarePage.jsx";
 import ChatWidget from "./components/ChatWidget.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
+import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
       {isAdminRoute ? null : <ChatWidget />}
