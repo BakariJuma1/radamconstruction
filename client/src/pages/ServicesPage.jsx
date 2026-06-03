@@ -119,7 +119,7 @@ const ServicesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-12 text-white sm:py-14">
+      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-8 text-white sm:py-10">
         <div className="container mx-auto px-4 text-center">
           <h1 className="mb-4 text-3xl font-bold sm:text-4xl">Our Services</h1>
           <p className="text-base sm:text-lg">
@@ -130,7 +130,7 @@ const ServicesPage = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-12 px-4">
+      <section className="px-4 py-6 sm:py-10">
         <div className="container mx-auto">
           {error ? (
             <div className="text-center py-8 bg-red-50 rounded-lg">

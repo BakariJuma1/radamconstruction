@@ -117,7 +117,7 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-stone-50">
-      <section className="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 py-10 text-white sm:py-14 md:py-16">
+      <section className="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 py-8 text-white sm:py-10 md:py-14">
         <div className="container mx-auto px-4 md:px-8">
           <div className="max-w-3xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-blue-200 sm:text-sm sm:tracking-[0.3em]">
@@ -134,8 +134,8 @@ export default function BookingPage() {
         </div>
       </section>
 
-      <section className="container mx-auto grid gap-6 px-4 py-8 md:px-8 md:py-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8">
-        <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-6 md:p-8">
+      <section className="container mx-auto grid gap-4 px-4 py-6 md:px-8 md:py-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8">
+        <div className="order-2 rounded-2xl bg-white p-4 shadow-sm sm:p-6 lg:order-1 lg:rounded-3xl">
           <div className="mb-6 sm:mb-8">
             <h2 className="text-xl font-semibold text-slate-900 sm:text-2xl">
               Project intake form
@@ -304,8 +304,8 @@ export default function BookingPage() {
           </form>
         </div>
 
-        <aside className="space-y-6">
-          <div className="rounded-3xl bg-slate-900 p-5 text-white shadow-lg sm:p-6">
+        <aside className="order-1 space-y-3 lg:order-2 lg:space-y-4">
+          <div className="rounded-2xl bg-slate-900 p-4 text-white shadow-sm sm:p-5 lg:rounded-3xl">
             <h2 className="text-xl font-semibold sm:text-2xl">Need a faster response?</h2>
             <p className="mt-3 text-sm text-slate-300">
               Use WhatsApp for instant follow-up on quotations, site visits, or
@@ -332,7 +332,7 @@ export default function BookingPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-white p-5 shadow-lg sm:p-6">
+          <div className="rounded-2xl bg-white p-4 shadow-sm sm:p-5 lg:rounded-3xl">
             <h3 className="text-lg font-semibold text-slate-900 sm:text-xl">
               What improves your quotation speed
             </h3>

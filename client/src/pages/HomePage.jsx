@@ -76,7 +76,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-slate-900">
-      <section className="overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(254,240,138,0.35),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#1d4ed8_48%,#0f766e_100%)] py-12 text-white sm:py-14 md:py-20 lg:py-24">
+      <section className="overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(254,240,138,0.35),_transparent_28%),linear-gradient(135deg,#0f172a_0%,#1d4ed8_48%,#0f766e_100%)] py-8 text-white sm:py-12 md:py-16 lg:py-20">
         <div className="container mx-auto grid gap-8 px-4 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200 sm:text-sm sm:tracking-[0.35em]">
@@ -113,8 +113,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid gap-4">
-            <div className="rounded-[2rem] bg-white/10 p-4 backdrop-blur">
+          <div className="grid gap-3">
+            <div className="rounded-2xl bg-white/10 p-3 backdrop-blur sm:rounded-[2rem] sm:p-4">
               {heroVisuals.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {heroVisuals.map((item, index) => (
@@ -166,27 +166,7 @@ export default function HomePage() {
                 </div>
               )}
             </div>
-            <div className="rounded-3xl bg-white/10 p-4 backdrop-blur sm:p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <div className="text-xl font-bold sm:text-3xl">60+</div>
-                  <div className="mt-1 text-xs text-slate-200 sm:text-sm">Projects completed</div>
-                </div>
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <div className="text-xl font-bold sm:text-3xl">10+</div>
-                  <div className="mt-1 text-xs text-slate-200 sm:text-sm">Years experience</div>
-                </div>
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <div className="text-xl font-bold sm:text-3xl">Build</div>
-                  <div className="mt-1 text-xs text-slate-200 sm:text-sm">Construction and renovation</div>
-                </div>
-                <div className="rounded-2xl bg-white/10 p-4">
-                  <div className="text-xl font-bold sm:text-3xl">Supply</div>
-                  <div className="mt-1 text-xs text-slate-200 sm:text-sm">Materials and hardware RFQ</div>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-3xl bg-white p-5 text-slate-900 shadow-2xl sm:p-6">
+            <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-2xl sm:rounded-3xl sm:p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-700 sm:text-sm sm:tracking-[0.3em]">
                 Start with the service you need
               </p>
@@ -216,7 +196,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white py-12">
+      <section className="bg-white py-8 sm:py-10">
         <div className="container mx-auto px-4 md:px-8">
           <p className="text-center text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 sm:text-sm sm:tracking-[0.35em]">
             Trusted suppliers and brands
@@ -239,8 +219,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-14 md:px-8">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <section className="container mx-auto px-4 py-8 md:px-8 md:py-12">
+        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-700">
               Services
@@ -297,7 +277,7 @@ export default function HomePage() {
         )}
       </section>
 
-      <section className="bg-slate-900 py-14 text-white">
+      <section className="bg-slate-900 py-8 text-white sm:py-12 md:py-14">
         <div className="container mx-auto px-4 md:px-8">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
@@ -399,8 +379,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-14 md:px-8">
-        <div className="mb-8">
+      <section className="container mx-auto px-4 py-8 md:px-8 md:py-12">
+        <div className="mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-700">
             Testimonials
           </p>
@@ -426,7 +406,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-amber-100 py-14">
+      <section className="bg-amber-100 py-8 sm:py-12 md:py-14">
         <div className="container mx-auto rounded-[2rem] bg-slate-900 px-6 py-10 text-white shadow-2xl md:px-10">
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>

@@ -8,77 +8,67 @@ export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState({ type: "", text: "" });
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setIsSubmitting(true);
     setStatus({ type: "", text: "" });
-
     try {
-      const response = await axios.post(`${API_BASE_URL}/forgot-password`, {
-        email,
-      });
-      setStatus({ type: "success", text: response.data.message });
+      const res = await axios.post(`${API_BASE_URL}/forgot-password`, { email });
+      setStatus({ type: "success", text: res.data.message });
       setEmail("");
-    } catch (error) {
-      setStatus({
-        type: "error",
-        text: error.response?.data?.error || "Unable to send reset email",
-      });
+    } catch (err) {
+      setStatus({ type: "error", text: err.response?.data?.error || "Unable to send reset email" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-6 sm:py-10">
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-lg sm:p-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Forgot Password</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Enter your email and we will send you a secure password reset link.
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
+      <div className="w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <h1 className="text-xl font-bold text-slate-900">Forgot password</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Enter your email and we'll send a reset link.
           </p>
         </div>
 
-        {status.text ? (
-          <div
-            className={`mt-6 rounded-lg px-4 py-3 text-sm ${
-              status.type === "success"
-                ? "bg-green-50 text-green-700"
-                : "bg-red-50 text-red-700"
-            }`}
-          >
-            {status.text}
-          </div>
-        ) : null}
+        <div className="rounded-2xl bg-white p-5 shadow-sm">
+          {status.text && (
+            <div className={`mb-4 rounded-lg px-3 py-2.5 text-sm ${
+              status.type === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+            }`}>
+              {status.text}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
-              placeholder="Enter your email"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                placeholder="you@example.com"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            >
+              {isSubmitting ? "Sending…" : "Send reset link"}
+            </button>
+          </form>
+        </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? "Sending..." : "Send reset link"}
-          </button>
-        </form>
-
-        <Link to="/login" className="mt-5 block text-center text-sm font-medium text-blue-600">
-          Back to login
+        <Link to="/login" className="mt-4 block text-center text-sm font-medium text-blue-600 hover:text-blue-700">
+          Back to sign in
         </Link>
       </div>
     </div>
