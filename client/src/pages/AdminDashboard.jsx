@@ -1090,82 +1090,65 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row overflow-x-hidden">
       {/* Main Content */}
-      <div className="order-2 flex-1 min-w-0 pb-20 md:pb-0 md:pl-80">
+      <div className="order-2 flex-1 min-w-0 md:pl-80">
         {/* Sticky Header */}
         <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-          <div className="px-4 py-4 sm:px-6 flex justify-between items-center gap-3">
-            {/* Hamburger menu button for mobile, now inside header */}
+          <div className="flex items-center gap-3 px-3 py-3 sm:px-6 sm:py-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="md:hidden mr-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg"
+              className="md:hidden flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white"
               aria-label="Toggle menu"
             >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d={isSidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
               </svg>
             </button>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-500 sm:text-xs">
                 Control Center
               </p>
-              <h2 className="mt-1 text-xl font-semibold text-slate-900 capitalize">
+              <h2 className="text-base font-semibold text-slate-900 capitalize sm:text-xl">
                 {activeTabMeta.label}
               </h2>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
               <div className="hidden md:flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
-                <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm text-white font-bold">
                   {user?.name?.[0] || user?.email?.[0] || "A"}
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-slate-900">
-                    {user?.name || "Administrator"}
-                  </p>
-                  <p className="text-xs text-slate-500 truncate max-w-[180px]">
-                    {user?.email}
-                  </p>
+                  <p className="text-sm font-semibold text-slate-900">{user?.name || "Administrator"}</p>
+                  <p className="text-xs text-slate-500 truncate max-w-[160px]">{user?.email}</p>
                 </div>
               </div>
-              <div className="rounded-2xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg">
-                {totalManagedItems} records
+              <div className="rounded-xl bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white">
+                {totalManagedItems} items
               </div>
             </div>
           </div>
         </header>
 
         <main className="p-3 sm:p-4 lg:p-6 overflow-x-hidden">
-          <section className="mb-6 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-200 px-6 py-6">
+          <section className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:mb-6 sm:rounded-[1.75rem]">
+            <div className="px-4 py-4 sm:px-6 sm:py-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500 sm:text-xs">
                     Admin Workspace
                   </p>
-                  <h1 className="mt-2 text-3xl font-bold text-slate-900">
-                    Manage {activeTabMeta.label.toLowerCase()} with fewer clicks
+                  <h1 className="mt-1 text-xl font-bold text-slate-900 sm:mt-2 sm:text-3xl">
+                    {activeTabMeta.label}
                   </h1>
-                  <p className="mt-3 max-w-2xl text-sm text-slate-600">
+                  <p className="mt-1 hidden max-w-2xl text-sm text-slate-600 sm:mt-2 sm:block">
                     Review activity, update content, and keep the site current from one dashboard.
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
                   {summaryCards.map((card) => (
-                    <div
-                      key={card.label}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
-                    >
-                      <div className="text-2xl font-bold text-slate-900">{card.value}</div>
-                      <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <div key={card.label} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 sm:rounded-2xl sm:px-4 sm:py-3">
+                      <div className="text-lg font-bold text-slate-900 sm:text-2xl">{card.value}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 sm:text-xs">
                         {card.label}
                       </div>
                     </div>
@@ -1173,7 +1156,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
             </div>
-            <div className="grid gap-3 px-6 py-4 text-sm text-slate-600 md:grid-cols-4 bg-slate-50/70">
+            <div className="hidden gap-3 border-t border-slate-100 px-6 py-4 text-sm text-slate-600 md:grid md:grid-cols-4 bg-slate-50/70">
               {summaryCards.map((card) => (
                 <div key={`${card.label}-helper`} className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
                   <p className="font-semibold text-slate-900">{card.label}</p>
@@ -2860,105 +2843,112 @@ const AdminDashboard = () => {
           )}
         </main>
       </div>
-      {/* Enhanced Sidebar */}
+      {/* Sidebar */}
       <div
-        className={`
-        order-1 fixed inset-x-0 top-[76px] bottom-0 left-0 z-40 w-full transform border-r border-slate-200 bg-white text-slate-900 shadow-lg transition-transform duration-300 ease-in-out md:inset-x-auto md:top-[112px] md:w-80
-        ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }
-      `}
+        className={`order-1 fixed top-0 bottom-0 left-0 z-40 w-72 transform border-r border-slate-200 bg-white text-slate-900 shadow-xl transition-transform duration-300 ease-in-out md:top-0 md:w-80 md:translate-x-0 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
-        <div className="border-b border-slate-200 bg-slate-900 p-6 text-white">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300">
-            Radamjaribu Builders
-          </p>
-          <h1 className="mt-3 text-2xl font-bold">Admin Dashboard</h1>
-          {user && (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-sm font-semibold text-white">
-                {user.name || "Administrator"}
-              </p>
-              <p className="mt-1 truncate text-xs text-slate-300">{user.email}</p>
-            </div>
-          )}
-        </div>
-        <nav className="p-4">
-          <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-            Navigation
-          </p>
-          {navTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setIsSidebarOpen(false);
-              }}
-              className={`mb-2 flex w-full items-center rounded-2xl px-4 py-4 text-left transition-all duration-200 ${
-                activeTab === tab.id
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <span
-                className={`mr-4 h-11 w-1 rounded-full ${
-                  activeTab === tab.id
-                    ? `bg-gradient-to-b ${tab.tone}`
-                    : "bg-slate-200"
-                }`}
-              />
+        <div className="flex h-full flex-col overflow-y-auto">
+          {/* Sidebar header */}
+          <div className="bg-slate-900 px-5 py-5 text-white">
+            <div className="flex items-center justify-between">
               <div>
-                <span className="block text-base font-semibold">{tab.label}</span>
-                <span
-                  className={`block text-xs ${
-                    activeTab === tab.id ? "text-slate-300" : "text-slate-400"
-                  }`}
-                >
-                  {tab.id === "bookings" &&
-                    `${unreadBookingsCount} new / ${bookings.length} total`}
-                  {tab.id === "contacts" &&
-                    `${unreadContactsCount} new / ${contacts.length} total`}
-                  {tab.id === "services" && `${services.length} services`}
-                  {tab.id === "portfolio" && `${portfolio.length} projects`}
-                  {tab.id === "hardware" &&
-                    `${hardwareCategories.length} categories`}
-                  {tab.id === "team" && `${teamMembers.length} members`}
-                  {tab.id === "settings" && "Platform controls"}
-                </span>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+                  Radamjaribu Builders
+                </p>
+                <h1 className="mt-1 text-lg font-bold">Admin Dashboard</h1>
               </div>
-              {(tab.id === "bookings" && unreadBookingsCount > 0) ||
-              (tab.id === "contacts" && unreadContactsCount > 0) ? (
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="md:hidden flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20"
+                aria-label="Close menu"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {user && (
+              <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-sm font-bold text-white">
+                    {user.name?.[0] || user.email?.[0] || "A"}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white">{user.name || "Administrator"}</p>
+                    <p className="truncate text-xs text-slate-400">{user.email}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Nav */}
+          <nav className="flex-1 p-3">
+            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+              Navigation
+            </p>
+            {navTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => { setActiveTab(tab.id); setIsSidebarOpen(false); }}
+                className={`mb-1 flex w-full items-center rounded-xl px-3 py-3 text-left transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
                 <span
-                  className={`ml-3 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                    activeTab === tab.id
-                      ? "bg-white/10 text-white"
-                      : "bg-sky-100 text-sky-700"
+                  className={`mr-3 h-8 w-1 shrink-0 rounded-full ${
+                    activeTab === tab.id ? `bg-gradient-to-b ${tab.tone}` : "bg-slate-200"
                   }`}
-                >
-                  {tab.id === "bookings"
-                    ? unreadBookingsCount
-                    : unreadContactsCount}
-                </span>
-              ) : null}
-              {activeTab === tab.id && (
-                <span className="ml-auto h-2 w-2 rounded-full bg-white"></span>
-              )}
+                />
+                <div className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold">{tab.label}</span>
+                  <span className={`block truncate text-xs ${activeTab === tab.id ? "text-slate-300" : "text-slate-400"}`}>
+                    {tab.id === "bookings" && `${unreadBookingsCount} new / ${bookings.length} total`}
+                    {tab.id === "contacts" && `${unreadContactsCount} new / ${contacts.length} total`}
+                    {tab.id === "services" && `${services.length} services`}
+                    {tab.id === "portfolio" && `${portfolio.length} projects`}
+                    {tab.id === "hardware" && `${hardwareCategories.length} categories`}
+                    {tab.id === "team" && `${teamMembers.length} members`}
+                    {tab.id === "settings" && "Platform controls"}
+                  </span>
+                </div>
+                {((tab.id === "bookings" && unreadBookingsCount > 0) ||
+                  (tab.id === "contacts" && unreadContactsCount > 0)) && (
+                  <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    activeTab === tab.id ? "bg-white/10 text-white" : "bg-sky-100 text-sky-700"
+                  }`}>
+                    {tab.id === "bookings" ? unreadBookingsCount : unreadContactsCount}
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
+
+          {/* Logout */}
+          <div className="border-t border-slate-100 p-3">
+            <button
+              onClick={logout}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-rose-600 transition-colors hover:bg-rose-50"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span className="text-sm font-semibold">Logout</span>
             </button>
-          ))}
-          <button
-            onClick={logout}
-            className="mt-8 flex w-full items-center rounded-2xl px-4 py-4 text-left text-rose-600 transition-colors duration-200 hover:bg-rose-50 hover:text-rose-700"
-          >
-            <span className="text-lg font-semibold">Logout</span>
-          </button>
-        </nav>
+          </div>
+        </div>
       </div>
-      {/* Overlay for mobile when sidebar is open */}
+
+      {/* Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
-        ></div>
+        />
       )}
 
       {/* AI Reply Draft Modal */}
